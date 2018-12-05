@@ -26,16 +26,16 @@ def geometrical_frame_procedure(frame):
     false_contours.append(eye_r)
     false_contours.append(mouth)
 
-    fill_black_out_contours(img, true_contours, false_contours)
+    final_img = fill_black_out_contours(img, true_contours, false_contours)
 
 
-    return
+    return get_sum_channels(final_img)
 
 
 def colorful_frame_procedure(frame):
     face = detect_face(image)
     skin = detect_skin(face, image)
-    return
+    return get_sum_channels(skin)
 
 
 def get_sum_channels(img):
