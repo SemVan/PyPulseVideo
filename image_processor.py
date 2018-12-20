@@ -52,6 +52,8 @@ def geometrical_frame_procedure(frame, rect):
     false_contours.append(mouth)
 
     final_img = fill_black_out_contours(frame, true_contours, false_contours)
+    cv2.imshow('geom', final_img)
+    cv2.waitKey(1)
     return get_sum_channels(final_img)
 
 
@@ -59,6 +61,8 @@ def colorful_frame_procedure(face, frame):
     skin = detect_skin(face, frame)
     # cv2.imshow("color", skin)
     # cv2.waitKey(10)
+    cv2.imshow('color', skin)
+    cv2.waitKey(1)
     return get_sum_channels(skin)
 
 

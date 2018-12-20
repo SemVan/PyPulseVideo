@@ -3,14 +3,15 @@ from video_processor import *
 import time
 from file_writer import *
 
-VIDEO_PATH = "./Videos"
-FILES_PATH = "./Signals"
+VIDEO_PATH = "./Videos/Measurements/"
+FILES_PATH = "./Videos/Signals/"
 
 for filename in os.listdir(VIDEO_PATH):
     if filename.endswith(".avi"):
         name = filename[:-4]
-        full_path = VIDEO_PATH + "/" + filename
-        text_path = VIDEO_PATH + "/Signals/" + name
+        full_path = VIDEO_PATH + filename
+        #text_path = VIDEO_PATH + "/Signals/" + name
+        text_path = FILES_PATH + name
         if not os.path.isdir(text_path):
             os.makedirs(text_path)
         print (text_path)
