@@ -52,17 +52,29 @@ def geometrical_frame_procedure(frame, rect):
     false_contours.append(mouth)
 
     final_img = fill_black_out_contours(frame, true_contours, false_contours)
-    cv2.imshow('geom', final_img)
+    r, g, b = get_sum_channels(final_img)
+    super_final = find_skin_regions(frame, rect, r, g, b)
+    cv2.imshow("hgkjg", final_img)
     cv2.waitKey(1)
     return get_sum_channels(final_img)
 
+
+def find_skin_regions(img, face, rd, gr, bl):
+    strt_x = face[0]
+    strt_y = face[1]
+    width = face[2]
+    height = face[3]
+    only_face = img[strt_y:strt_y+height, strt_x:strt_x+width]
+    lower = numpy.array([rd-0.2*rd, gr-0.2*gr, bl-0.2*bl], dtype = only_face.dtype)
+    upper = numpy.array([rd+0.2*rd, gr+0.2*gr, bl+0.2*bl], dtype = only_face.dtype)
+    skin_mask = cv2.inRange(only_face, lower, upper)
+    final = cv2.bitwise_and(only_face, only_face, mask = skin_mask)
+    return final
 
 def colorful_frame_procedure(face, frame):
     skin = detect_skin(face, frame)
     # cv2.imshow("color", skin)
     # cv2.waitKey(10)
-    cv2.imshow('color', skin)
-    cv2.waitKey(1)
     return get_sum_channels(skin)
 
 
@@ -72,9 +84,20 @@ def get_sum_channels(frame):
     g = cv2.sumElems(channels[1])
     b = cv2.sumElems(channels[2])
 
-    r = r[0]/cv2.countNonZero(channels[0])
-    g = g[0]/cv2.countNonZero(channels[1])
-    b = b[0]/cv2.countNonZero(channels[2])
+    rn = cv2.countNonZero(channels[0])
+    gn = cv2.countNonZero(channels[1])
+    bn = cv2.countNonZero(channels[2])
+
+    if rn==0:
+        rn = 1
+    if gn == 0:
+        gn = 1
+    if bn == 0:
+        bn = 1
+
+    r = r[0]/rn
+    g = g[0]/gn
+    b = b[0]/gn
     return r, g, b
 
 
@@ -144,7 +167,7 @@ def detect_skin(face, background):
 
 
 def detect_face(image):
-    faces = cascade.detectMultiScale(image, scaleFactor=1.1, minNeighbors=5, minSize=(60, 60), maxSize=(250, 250))
+    faces = cascade.detectMultiScale(image, scaleFactor=1.1, minNeighbors=5, minSize=(50, 50), maxSize=(550, 550))
     if len(faces) > 0:
         strt_x = faces[0][0]
         strt_y = faces[0][1]
