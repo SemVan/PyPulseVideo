@@ -35,7 +35,7 @@ def get_segmented_signal(img, points):
 
     channels = cv2.split(img)
     height, width = channels[0].shape
-    one_frame_vpg = np.zeros(shape=(3, len(hor)-1, len(ver)-1))
+    one_frame_vpg = np.zeros(shape=(3, len(ver)-1, len(hor)-1))
     nimg = img.copy()
     for i in range(len(hor)-1):
         hl_x = points[hor[i]][0,0]
@@ -49,17 +49,15 @@ def get_segmented_signal(img, points):
             cv2.line(nimg, (lr_x, 0), (lr_x, height), color = (0, 0, 0))
             cv2.line(nimg, (0, hl_y), (width, hl_y), color = (0, 0, 0))
             cv2.line(nimg, (0, lr_y), (width, lr_y), color = (0, 0, 0))
-            # cv2.imshow("lines", nimg)
-            # cv2.waitKey(0)
-            nimg = img.copy()
 
-            print(hl_x, lr_x, hl_y, lr_y)
-            submats = np.asarray([x[hl_x:lr_x, hl_y:lr_y] for x in channels])
+            submats = np.asarray([x[hl_y:lr_y, hl_x:lr_x] for x in channels])
             means = np.mean(submats, axis = (1,2))
             print(means)
             for k in range(len(channels)):
-                # print(submats[k])
-                one_frame_vpg[k][i][j] = np.mean(submats[k])
+                one_frame_vpg[k][len(ver)-j-2][i] = np.mean(submats[k])
+            cv2.imshow("lines", nimg)
+            cv2.waitKey(0)
+            nimg = img.copy()
     return one_frame_vpg
 
 
@@ -77,7 +75,7 @@ plt.show()
 draw_lines(im_grey, dot_array)
 
 # face = get_face_contour(dot_array)
-new_im = annotate_landmarks(im_grey, dot_array)
-cv2.imshow("g", new_im)
+# new_im = annotate_landmarks(im_grey, dot_array)
+# cv2.imshow("g", new_im)
 # cv2.imshow("vpg", vpg[0])
-cv2.waitKey()
+# cv2.waitKey()
