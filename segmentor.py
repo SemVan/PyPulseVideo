@@ -10,28 +10,14 @@ np.set_printoptions(formatter={'float_kind':float_formatter})
 ver =  [6, 5, 57, 50, 33, 30, 29, 28]
 hor = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10 ,11, 12, 13, 14, 15]
 
+def get_segmented_video(file_path):
 
-def draw_lines(img, points):
-    left = 0
-
-    height, width = img.shape
-
-    for h in hor:
-         x = points[h]
-         x = x[0, 0]
-         cv2.line(img, (x, 0), (x, height), color = (0, 0, 0))
-
-    for v in ver:
-         y = points[v]
-         y = y[0, 1]
-         cv2.line(img, (0, y), (width, y), color = (0, 0, 0))
-
-    cv2.imshow('lines', img)
-    cv2.waitKey()
     return
 
-
 def get_segmented_signal(img, points):
+    face_frame, rectangle = detect_face(frame)
+    im_grey = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+    points = get_landmarks(frame, rectangle)
 
     channels = cv2.split(img)
     height, width = channels[0].shape
@@ -49,24 +35,21 @@ def get_segmented_signal(img, points):
             cv2.line(nimg, (lr_x, 0), (lr_x, height), color = (0, 0, 0))
             cv2.line(nimg, (0, hl_y), (width, hl_y), color = (0, 0, 0))
             cv2.line(nimg, (0, lr_y), (width, lr_y), color = (0, 0, 0))
+            cv2.imshow("lines", nimg)
+            cv2.waitKey(0)
+            nimg = img.copy()
 
             submats = np.asarray([x[hl_y:lr_y, hl_x:lr_x] for x in channels])
             means = np.mean(submats, axis = (1,2))
             print(means)
             for k in range(len(channels)):
                 one_frame_vpg[k][len(ver)-j-2][i] = np.mean(submats[k])
-            cv2.imshow("lines", nimg)
-            cv2.waitKey(0)
-            nimg = img.copy()
     return one_frame_vpg
 
 
 frame = cv2.imread("girl.jpg")
 
-face_frame, rectangle = detect_face(frame)
 
-im_grey = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-dot_array = get_landmarks(frame, rectangle)
 
 vpg = get_segmented_signal(frame, dot_array)
 print(vpg[1])
