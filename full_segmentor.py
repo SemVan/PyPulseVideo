@@ -16,10 +16,7 @@ for filename in os.listdir(VIDEO_PATH):
             os.makedirs(text_path)
         print (text_path)
         start = time.time()
-        geom, color = full_video_file_procedure(full_path)
+        seg_sig = get_segmented_video(text_path)
         print(time.time() - start)
-        if not geom == None:
-            geom_path = text_path +'/'+"geom.txt"
-            color_path = text_path +'/'+"color.txt"
-            write_file(geom_path, geom)
-            write_file(color_path, color)
+        if not seg_sig == None:
+            write_segmented_file(sef_path, seg_sig)

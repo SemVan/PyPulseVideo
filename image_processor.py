@@ -1,7 +1,7 @@
-import opencv2
+import cv2
 import dlib
-
-
+import numpy
+import datetime as dt
 
 PREDICTOR_PATH = "shape_predictor_68_face_landmarks.dat"
 predictor = dlib.shape_predictor(PREDICTOR_PATH)
@@ -10,47 +10,101 @@ cascade = cv2.CascadeClassifier(cascade_path)
 
 
 
-def geometrical_frame_procedure(frame):
-    im_grey = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+def full_frame_procedure(frame):
+    start = dt.datetime.now()
+    face_frame, rectangle = detect_face(frame)
+
+    if rectangle == None:
+        print("returning None")
+        return None, None
+    face_stop = dt.datetime.now()
+    face_el = face_stop-start
+    print("face detection " + str(face_el.microseconds/1000))
+    geom = geometrical_frame_procedure(frame, rectangle)
+    geom_stop = dt.datetime.now()
+    geom_el = geom_stop-face_stop
+    print("geometrical processing " + str(geom_el.microseconds/1000))
+
+    color = colorful_frame_procedure(face_frame, frame)
+    color_stop = dt.datetime.now()
+    color_el = color_stop-geom_stop
+    full_el = color_stop-start
+    print("color processing " + str(color_el.microseconds/1000))
+    print("full processing " + str(full_el.microseconds/1000))
+    print()
+    return geom, color
+
+def geometrical_frame_procedure(frame, rect):
+    im_grey = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
     true_contours = []
     false_contours = []
-    dot_array = get_landmarks(img)
+    dot_array = get_landmarks(frame, rect)
 
     face = get_face_contour(dot_array)
-    eye_l, eye_r = get_eyes_contours(dot_array)
-    mouth = get_lips_contour(dot_array)
+    eye_l = dot_array[36:41]
+    eye_r = dot_array[42:47]
+    mouth = dot_array[48:60]
 
     true_contours.append(face)
     false_contours.append(eye_l)
     false_contours.append(eye_r)
     false_contours.append(mouth)
 
-    fill_black_out_contours(img, true_contours, false_contours)
+    final_img = fill_black_out_contours(frame, true_contours, false_contours)
+    r, g, b = get_sum_channels(final_img)
+    super_final = find_skin_regions(frame, rect, r, g, b)
+    cv2.imshow("hgkjg", final_img)
+    cv2.waitKey(1)
+    return get_sum_channels(final_img)
 
 
-    return
+def find_skin_regions(img, face, rd, gr, bl):
+    strt_x = face[0]
+    strt_y = face[1]
+    width = face[2]
+    height = face[3]
+    only_face = img[strt_y:strt_y+height, strt_x:strt_x+width]
+    lower = numpy.array([rd-0.2*rd, gr-0.2*gr, bl-0.2*bl], dtype = only_face.dtype)
+    upper = numpy.array([rd+0.2*rd, gr+0.2*gr, bl+0.2*bl], dtype = only_face.dtype)
+    skin_mask = cv2.inRange(only_face, lower, upper)
+    final = cv2.bitwise_and(only_face, only_face, mask = skin_mask)
+    return final
+
+def colorful_frame_procedure(face, frame):
+    skin = detect_skin(face, frame)
+    # cv2.imshow("color", skin)
+    # cv2.waitKey(10)
+    return get_sum_channels(skin)
 
 
-def colorful_frame_procedure(frame):
-    face = detect_face(image)
-    skin = detect_skin(face, image)
-    return
-
-
-def get_sum_channels(img):
-    channels = cv2.split(image)
+def get_sum_channels(frame):
+    channels = cv2.split(frame)
     r = cv2.sumElems(channels[0])
     g = cv2.sumElems(channels[1])
     b = cv2.sumElems(channels[2])
+
+    rn = cv2.countNonZero(channels[0])
+    gn = cv2.countNonZero(channels[1])
+    bn = cv2.countNonZero(channels[2])
+
+    if rn==0:
+        rn = 1
+    if gn == 0:
+        gn = 1
+    if bn == 0:
+        bn = 1
+
+    r = r[0]/rn
+    g = g[0]/gn
+    b = b[0]/gn
     return r, g, b
 
 
 
-def get_landmarks(im):
-    rects = cascade.detectMultiScale(im, 1.3,5)
-    x,y,w,h = rects[0]
-    print(x,y,w,h)
+def get_landmarks(im, rect):
+    x,y,w,h = rect
+    # print(x,y,w,h)
     rect = dlib.rectangle(int(x), int(y), int(x+w), int(y+h))
     return numpy.matrix([[p.x, p.y] for p in predictor(im, rect).parts()])
 
@@ -65,14 +119,6 @@ def get_face_contour(landmarks):
     cut_dot_array = numpy.concatenate((face_con, brow_con), axis = 0)
 
     return cut_dot_array
-
-
-def get_eyes_contours(landmarks):
-    return landmarks[36:41], landmarks[42:47]
-
-
-def get_lips_contour(landmarks):
-    return landmarks[48:60]
 
 
 def fill_black_out_contours(img, true_conts, false_conts):
@@ -104,8 +150,8 @@ def annotate_landmarks(im, landmarks):
 
 
 def detect_skin(face, background):
-    min_YCrCb = np.array([0,133,77],np.uint8)
-    max_YCrCb = np.array([255,173,127],np.uint8)
+    min_YCrCb = numpy.array([0,133,77],numpy.uint8)
+    max_YCrCb = numpy.array([255,173,127],numpy.uint8)
 
     imageYCrCb = cv2.cvtColor(face,cv2.COLOR_BGR2YCR_CB)
     skinRegion = cv2.inRange(imageYCrCb,min_YCrCb,max_YCrCb)
@@ -121,12 +167,12 @@ def detect_skin(face, background):
 
 
 def detect_face(image):
-    faces = cascade.detectMultiScale(image, scaleFactor=1.1, minNeighbors=5, minSize=(60, 60), maxSize=(250, 250))
+    faces = cascade.detectMultiScale(image, scaleFactor=1.1, minNeighbors=5, minSize=(50, 50), maxSize=(550, 550))
     if len(faces) > 0:
         strt_x = faces[0][0]
         strt_y = faces[0][1]
         width = faces[0][2]
         height = faces[0][3]
         only_face = image[strt_y:strt_y+height, strt_x:strt_x+width]
-        return only_face
-    return image
+        return only_face, faces[0]
+    return image, None
