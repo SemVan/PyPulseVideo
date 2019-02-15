@@ -25,6 +25,7 @@ def read_segmented_file(file_name):
     return unpack_signal(packed_sig, dims)
 
 def pack_signal(unpacked):
+    """Shape was frame-channel-row-column. Shape became frame-channel-row*column"""
     old_shape = unpacked.shape
     new_shape = (old_shape[0], old_shape[1], old_shape[2]*old_shape[3] )
     packed = np.reshape(unpacked, new_shape)

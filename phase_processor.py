@@ -6,62 +6,21 @@ from scipy.signal import correlate
 from scipy.signal import butter, lfilter, lfilter_zi, welch, convolve2d
 from scipy.stats import mannwhitneyu
 
-DESCRETISATION_PERIOD = 0.001
+DESCRETISATION_PERIOD = 0.040
 
-def plot_signals(ch1, ch2, offset):
-    if offset>=0:
-        ch2 = ch2[int(offset):]
-    else:
-        ch1 = ch1[:int(offset)]
-    plt.plot(range(len(ch1)), ch1, color='red')
-    plt.plot(range(len(ch2)), ch2, color='green')
-    plt.show()
-    return
-
+def full_frame_phase_mask(vpg):
+    """For one video piece actually"""
+    sig_ref = vpg[0][0]
+    phase_mask = np.zeros((vp.shape[0:2]))
+    for row in range(vpg.shape[0]):
+        for column in range(vpg.shape[1]):
+            phase_mask[row][column] = get_frame_phase_mask(sig_ref, vpg[row][column])
+    return phase_mask
 
 def get_phase_shift(sig1, sig2):
     cross_corr = correlate(sig2, sig1, 'full', 'direct')
-    # plt.plot(range(len(cross_corr)), cross_corr)
-    # plt.show()
     shift = np.argmax(cross_corr) - len(sig1)
     return shift*DESCRETISATION_PERIOD
-
-
-def butter_bandpass(lowcut, highcut, fs, order=3):
-    nyq = 0.5 * fs
-    low = lowcut / nyq
-    high = highcut / nyq
-    b, a = butter(order, [low, high], btype='band')
-    return b, a
-
-
-def butter_bandpass_filter(data, lowcut, highcut, fs, order=5):
-    b, a = butter_bandpass(lowcut, highcut, fs, order=order)
-    zi = lfilter_zi(b, a)
-    y, z = lfilter(b, a, data, zi=zi*data[0])
-    return y
-
-
-def norm_signal(sp):
-    max = np.max(sp)
-    norm = []
-    for i in range(len(sp)):
-        norm.append(sp[i] / max)
-    return norm
-
-
-def get_spectra(signal):
-    period = 1/1000
-    complex_four = np.fft.fft(signal)
-    spectra = np.absolute(complex_four)
-    freqs = []
-    for i in range(len(signal)):
-        freqs.append(1/(period*len(signal))*i)
-
-    plt.plot(freqs, spectra)
-    plt.ylim([0, 20])
-    plt.show()
-    return spectra, freqs
 
 
 def shift_matrix_procedure(mat, st_shift, mat_name):
@@ -132,29 +91,3 @@ def get_roi_means(mat):
     new_res[1][0] = res[-1][0]
     new_res[1][1] = res[-1][-1]
     return new_res
-
-def full_signals_procedure(ch1, ch2):
-
-    ch1 = butter_bandpass_filter(ch1, 0.1, 5, 1000, 3)
-    ch2 = butter_bandpass_filter(ch2, 0.1, 5, 1000, 3)
-    ch1 = norm_signal(ch1)
-    ch2 = norm_signal(ch2)
-    # get_spectra(sig1)
-    sh = get_phase_shift(ch1, ch2)
-    print(sh)
-    return ch1, ch2, sh
-
-
-def get_mann_whitney_result(data):
-    level = 23
-    d_t = np.transpose(data)
-    sh = d_t.shape
-    u_test = np.zeros(shape = (sh[0], sh[0]))
-
-    for i in range(sh[0]):
-        for j in range(sh[0]):
-            res, p = mannwhitneyu(d_t[i], d_t[j])
-            u_test[i][j] = int(res<=level)
-    print(u_test)
-
-    return

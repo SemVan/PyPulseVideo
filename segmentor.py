@@ -3,8 +3,12 @@ from image_processor import*
 import numpy as np
 from matplotlib import pyplot as plt
 from segmented_io import *
+<<<<<<< HEAD
 import datetime as dt
 
+=======
+import time
+>>>>>>> eb6a1cbd8e2c105c4d2771b47e1db65180df0826
 
 float_formatter = lambda x: "%.3f" % x
 np.set_printoptions(formatter={'float_kind':float_formatter})
@@ -68,6 +72,7 @@ def get_segmented_frame(img):
     return one_frame_vpg
 
 
+<<<<<<< HEAD
 # frame = cv2.imread("girl.jpg")
 # sig = []
 # vpg = get_segmented_frame(frame)
@@ -77,3 +82,14 @@ def get_segmented_frame(img):
 # write_segmented_file(file_path, sig)
 # sig_r = read_segmented_file(file_path)
 # print(np.isclose(sig, sig_r, atol=0.001))
+=======
+frame = cv2.imread("girl.jpg")
+sig = []
+vpg = get_segmented_frame(frame)
+sig.append(vpg)
+sig = np.asarray(sig)
+file_path = "./Segmented/fuck.csv"
+write_segmented_file(file_path, sig)
+sig_r = read_segmented_file(file_path)
+print(np.isclose(sig, sig_r, atol=0.001))
+>>>>>>> eb6a1cbd8e2c105c4d2771b47e1db65180df0826
