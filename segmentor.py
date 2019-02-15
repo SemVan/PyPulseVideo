@@ -3,6 +3,7 @@ from image_processor import*
 import numpy as np
 from matplotlib import pyplot as plt
 from segmented_io import *
+import datetime as dt
 
 
 float_formatter = lambda x: "%.3f" % x
@@ -21,21 +22,24 @@ def get_segmented_video(file_name):
 
     full_video_signals = []
     while cap.isOpened():
+        st = dt.datetime.now()
         ret, img = cap.read()
         if ret == False:
             break
         one_vpg = get_segmented_frame(img)
-        if one_vpg == None:
+        if one_vpg == []:
             return None, None
         full_video_signals.append(one_vpg)
+        frametime = dt.datetime.now() - st
+        print(frametime.microseconds/1000)
     return np.asarray(full_video_signals)
 
 def get_segmented_frame(img):
-    face_frame, rectangle = detect_face(frame)
+    face_frame, rectangle = detect_face(img)
     if rectangle == None:
-        return None
-    im_grey = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-    points = get_landmarks(frame, rectangle)
+        return []
+    im_grey = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    points = get_landmarks(img, rectangle)
 
     channels = cv2.split(img)
     height, width = channels[0].shape
@@ -64,18 +68,12 @@ def get_segmented_frame(img):
     return one_frame_vpg
 
 
-frame = cv2.imread("girl.jpg")
-sig = []
-vpg = get_segmented_frame(frame)
-sig.append(vpg)
-sig = np.asarray(sig)
-file_path = "./Segmented/fuck.csv"
-write_segmented_file(file_path, sig)
-sig_r = read_segmented_file(file_path)
-print(np.isclose(sig, sig_r, atol=0.001))
-
-# face = get_face_contour(dot_array)
-# new_im = annotate_landmarks(im_grey, dot_array)
-# cv2.imshow("g", new_im)
-# cv2.imshow("vpg", vpg[0])
-# cv2.waitKey()
+# frame = cv2.imread("girl.jpg")
+# sig = []
+# vpg = get_segmented_frame(frame)
+# sig.append(vpg)
+# sig = np.asarray(sig)
+# file_path = "./Segmented/fuck.csv"
+# write_segmented_file(file_path, sig)
+# sig_r = read_segmented_file(file_path)
+# print(np.isclose(sig, sig_r, atol=0.001))
