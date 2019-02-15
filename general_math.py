@@ -19,10 +19,13 @@ def full_signals_procedure(ch1, ch2):
 
 
 def get_channels_sum(frame_sequence):
+    """Shape was frame-channel-row-column. Became row-column-frame"""
+
     f_seq_t = np.transpose(frame_sequence, (1, 0, 2, 3))
     weighted_sum = f_seq_t[0]/(f_seq_t[1]+f_seq_t[2])
     weighted_sum[weighted_sum == np.inf] = 0
-    return weighted_sum
+    true_signal = np.transpose(weighted_sum, (1, 2, 0) )
+    return true_signal
 
 def plot_signals(ch1, ch2, offset):
     if offset>=0:

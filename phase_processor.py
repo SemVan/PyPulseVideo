@@ -6,17 +6,19 @@ from scipy.signal import correlate
 from scipy.signal import butter, lfilter, lfilter_zi, welch, convolve2d
 from scipy.stats import mannwhitneyu
 
-DESCRETISATION_PERIOD = 0.001
+DESCRETISATION_PERIOD = 0.040
 
 def full_frame_phase_mask(vpg):
-
-
-    return
+    """For one video piece actually"""
+    sig_ref = vpg[0][0]
+    phase_mask = np.zeros((vp.shape[0:2]))
+    for row in range(vpg.shape[0]):
+        for column in range(vpg.shape[1]):
+            phase_mask[row][column] = get_frame_phase_mask(sig_ref, vpg[row][column])
+    return phase_mask
 
 def get_phase_shift(sig1, sig2):
     cross_corr = correlate(sig2, sig1, 'full', 'direct')
-    # plt.plot(range(len(cross_corr)), cross_corr)
-    # plt.show()
     shift = np.argmax(cross_corr) - len(sig1)
     return shift*DESCRETISATION_PERIOD
 
