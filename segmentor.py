@@ -3,7 +3,7 @@ from image_processor import*
 import numpy as np
 from matplotlib import pyplot as plt
 from segmented_io import *
-
+import time
 
 float_formatter = lambda x: "%.3f" % x
 np.set_printoptions(formatter={'float_kind':float_formatter})
@@ -31,6 +31,7 @@ def get_segmented_video(file_name):
     return np.asarray(full_video_signals)
 
 def get_segmented_frame(img):
+
     face_frame, rectangle = detect_face(frame)
     if rectangle == None:
         return None
@@ -73,9 +74,3 @@ file_path = "./Segmented/fuck.csv"
 write_segmented_file(file_path, sig)
 sig_r = read_segmented_file(file_path)
 print(np.isclose(sig, sig_r, atol=0.001))
-
-# face = get_face_contour(dot_array)
-# new_im = annotate_landmarks(im_grey, dot_array)
-# cv2.imshow("g", new_im)
-# cv2.imshow("vpg", vpg[0])
-# cv2.waitKey()

@@ -2,15 +2,16 @@ import os
 from video_processor import *
 import time
 from file_writer import *
+from segmented_io import *
+
 
 VIDEO_PATH = "./Videos/Measurements/"
-FILES_PATH = "./Videos/Signals/"
+FILES_PATH = "./Segmented/Signals/"
 
 for filename in os.listdir(VIDEO_PATH):
     if filename.endswith(".avi"):
         name = filename[:-4]
         full_path = VIDEO_PATH + filename
-        #text_path = VIDEO_PATH + "/Signals/" + name
         text_path = FILES_PATH + name
         if not os.path.isdir(text_path):
             os.makedirs(text_path)
