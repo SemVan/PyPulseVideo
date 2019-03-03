@@ -2,26 +2,16 @@ import os
 from video_processor import *
 import time
 from file_writer import *
-from segmented_io import *
 from segmentor import *
 
-
-# <<<<<<< HEAD:full_segmentor.py
-#
-# VIDEO_PATH = "./Videos/Measurements/"
-# FILES_PATH = "./Videos/Segmented/"
-# =======
-
-
-
 VIDEO_PATH = "./Videos/Measurements/"
-FILES_PATH = "./Segmented/Signals/"
-
+FILES_PATH = "./Videos/Segmented/"
 
 for filename in os.listdir(VIDEO_PATH):
     if filename.endswith(".avi"):
         name = filename[:-4]
         full_path = VIDEO_PATH + filename
+        #text_path = VIDEO_PATH + "/Signals/" + name
         text_path = FILES_PATH + name
         file_name = text_path + "/" + name + ".csv"
         if not os.path.isdir(text_path):
