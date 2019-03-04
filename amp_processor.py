@@ -6,6 +6,12 @@ import numpy as np
 
 
 def full_frame_amp_procedure(vpg):
+    vpg_shape = vpg.shape
+    vpg_hr = np.zeros(shape=vpg_shape[:-1])
+    vpg_snr = np.zeros(shape=vpg_shape[:-1])
+    for i in range(vpg_shape[0]):
+        for j in range (vpg_shape[0]):
+
 
     return
 

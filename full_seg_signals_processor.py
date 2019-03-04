@@ -16,7 +16,7 @@ def all_signals_processor():
 
 def one_vpg_processor(vpg):
     vpg_piece_3ch = vpg
-    vpg_piece_weighted = get_channels_sum(vpg_piece_3ch)
+    vpg_piece_weighted = get_channels_sum(vpg_piece_3ch) #changes shape
     phase_mask = full_frame_phase_mask(vpg_piece)
     hr_mask, snr_mask = full_frame_amp_procedure(vpg_piece)
 

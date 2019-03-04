@@ -12,8 +12,6 @@ from segmentor import *
 # FILES_PATH = "./Videos/Segmented/"
 # =======
 
-
-
 VIDEO_PATH = "./Videos/Measurements/"
 FILES_PATH = "./Segmented/Signals/"
 

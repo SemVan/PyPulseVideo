@@ -3,12 +3,10 @@ from image_processor import*
 import numpy as np
 from matplotlib import pyplot as plt
 from segmented_io import *
-<<<<<<< HEAD
 import datetime as dt
 
-=======
 import time
->>>>>>> eb6a1cbd8e2c105c4d2771b47e1db65180df0826
+
 
 float_formatter = lambda x: "%.3f" % x
 np.set_printoptions(formatter={'float_kind':float_formatter})
@@ -57,12 +55,12 @@ def get_segmented_frame(img):
             hl_y = points[ver[j+1]][0,1]
             lr_y = points[ver[j]][0,1]
             nimg = img.copy()
-            # cv2.line(nimg, (hl_x, 0), (hl_x, height), color = (0, 0, 0))
-            # cv2.line(nimg, (lr_x, 0), (lr_x, height), color = (0, 0, 0))
-            # cv2.line(nimg, (0, hl_y), (width, hl_y), color = (0, 0, 0))
-            # cv2.line(nimg, (0, lr_y), (width, lr_y), color = (0, 0, 0))
-            # cv2.imshow("lines", nimg)
-            # cv2.waitKey(0)
+            cv2.line(nimg, (hl_x, 0), (hl_x, height), color = (0, 0, 0))
+            cv2.line(nimg, (lr_x, 0), (lr_x, height), color = (0, 0, 0))
+            cv2.line(nimg, (0, hl_y), (width, hl_y), color = (0, 0, 0))
+            cv2.line(nimg, (0, lr_y), (width, lr_y), color = (0, 0, 0))
+            cv2.imshow("lines", nimg)
+            cv2.waitKey(0)
 
             submats = np.asarray([x[hl_y:lr_y, hl_x:lr_x] for x in channels])
             means = np.mean(submats, axis = (1,2))
@@ -72,7 +70,6 @@ def get_segmented_frame(img):
     return one_frame_vpg
 
 
-<<<<<<< HEAD
 # frame = cv2.imread("girl.jpg")
 # sig = []
 # vpg = get_segmented_frame(frame)
@@ -82,14 +79,3 @@ def get_segmented_frame(img):
 # write_segmented_file(file_path, sig)
 # sig_r = read_segmented_file(file_path)
 # print(np.isclose(sig, sig_r, atol=0.001))
-=======
-frame = cv2.imread("girl.jpg")
-sig = []
-vpg = get_segmented_frame(frame)
-sig.append(vpg)
-sig = np.asarray(sig)
-file_path = "./Segmented/fuck.csv"
-write_segmented_file(file_path, sig)
-sig_r = read_segmented_file(file_path)
-print(np.isclose(sig, sig_r, atol=0.001))
->>>>>>> eb6a1cbd8e2c105c4d2771b47e1db65180df0826
