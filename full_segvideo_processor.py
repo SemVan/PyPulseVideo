@@ -6,11 +6,6 @@ from segmented_io import *
 from segmentor import *
 
 
-# <<<<<<< HEAD:full_segmentor.py
-#
-# VIDEO_PATH = "./Videos/Measurements/"
-# FILES_PATH = "./Videos/Segmented/"
-# =======
 
 VIDEO_PATH = "./Videos/Measurements/"
 FILES_PATH = "./Segmented/Signals/"
