@@ -8,7 +8,7 @@ from scipy.stats import mannwhitneyu
 
 DESCRETISATION_PERIOD = 0.040
 
-def full_frame_phase_mask(vpg):
+def full_fragment_phase_mask(vpg):
     """For one video piece actually"""
     sig_ref = vpg[0][0]
     phase_mask = np.zeros((vp.shape[0:2]))
