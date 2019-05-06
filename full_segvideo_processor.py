@@ -9,14 +9,15 @@ from segmentor import *
 
 VIDEO_PATH = "./Videos/Measurements/"
 FILES_PATH = "./Segmented/Signals/"
-
+FILE_NAME = "signal.csv"
 
 for filename in os.listdir(VIDEO_PATH):
     if filename.endswith(".avi"):
         name = filename[:-4]
         full_path = VIDEO_PATH + filename
         text_path = FILES_PATH + name
-        file_name = text_path + "/" + name + ".csv"
+        #file_name = text_path + "/" + name + ".csv"
+        file_name = text_path + "/" + FILE_NAME
         if not os.path.isdir(text_path):
             os.makedirs(text_path)
         print (text_path)

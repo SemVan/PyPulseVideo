@@ -13,7 +13,7 @@ def full_fragment_amp_procedure(vpg):
     vpg_snr = np.zeros(shape=vpg_shape[:-1])
     vpg_flag = np.zeros(shape=vpg_shape[:-1])
     for i in range(vpg_shape[0]):
-        for j in range (vpg_shape[0]):
+        for j in range (vpg_shape[1]): #changed shape element number
             vpg_hr, vpg_snr, vpg_flag = one_segment_procedure(vpg[i][j])
 
     return vpg_hr, vpg_snr, vpg_flag
