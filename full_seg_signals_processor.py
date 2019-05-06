@@ -16,9 +16,12 @@ def all_signals_processor():
 
 def one_vpg_processor(vpg):
     #need to split file into windows here
-    vpg_piece_3ch = vpg
-    vpg_piece_weighted = get_channels_sum(vpg_piece_3ch) #changes shape
-    phase_mask = full_frame_phase_mask(vpg_piece)
-    hr_mask, snr_mask = full_frame_amp_procedure(vpg_piece)
+    #print shape, check the right dimension
+    frame_size = vpg.shape[0]
+    for i in range(frame_size-PIECE_LENGTH):
+        vpg_piece_3ch = vpg[i:i+PIECE_LENGTH]
+        vpg_piece_weighted = get_channels_sum(vpg_piece_3ch) #changes shape
+        phase_mask = full_frame_phase_mask(vpg_piece)
+        hr_mask, snr_mask = full_frame_amp_procedure(vpg_piece)
 
     return [phase_mask, hr_mask, snr_mask]
