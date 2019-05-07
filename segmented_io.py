@@ -5,7 +5,7 @@ import csv
 def write_segmented_file(file_path,video_signal):
     dims = video_signal.shape
     packed_sig = pack_signal(video_signal)
-    with open(file_path, 'w') as csvfile:
+    with open(file_path, 'w', newline='') as csvfile:
         writer = csv.writer(csvfile, delimiter = ',')
         writer.writerow(dims)
         for i in range(packed_sig.shape[0]):

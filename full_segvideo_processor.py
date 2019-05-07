@@ -7,7 +7,7 @@ from segmentor import *
 
 
 
-VIDEO_PATH = "./Videos/Measurements/"
+VIDEO_PATH = "./Measurements/"
 FILES_PATH = "./Segmented/Signals/"
 FILE_NAME = "signal.csv"
 
@@ -24,5 +24,5 @@ for filename in os.listdir(VIDEO_PATH):
         start = time.time()
         seg_sig = get_segmented_video(full_path)
         print(time.time() - start)
-        if not seg_sig == None:
+        if not len(seg_sig) == 0:
             write_segmented_file(file_name, seg_sig)

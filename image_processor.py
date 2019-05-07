@@ -167,7 +167,7 @@ def detect_skin(face, background):
 
 
 def detect_face(image):
-    faces = cascade.detectMultiScale(image, scaleFactor=1.1, minNeighbors=5, minSize=(50, 50), maxSize=(550, 550))
+    faces = cascade.detectMultiScale(image, scaleFactor=1.1, minNeighbors=5, minSize=(100, 100), maxSize=(550, 550))
     if len(faces) > 0:
         strt_x = faces[0][0]
         strt_y = faces[0][1]
@@ -175,4 +175,4 @@ def detect_face(image):
         height = faces[0][3]
         only_face = image[strt_y:strt_y+height, strt_x:strt_x+width]
         return only_face, faces[0]
-    return image, None
+    return image, []
