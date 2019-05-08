@@ -1,4 +1,7 @@
 import csv
+import numpy as np
+
+
 
 PHASE_NAME = "phase.csv"
 HR_NAME = "hr.csv"
@@ -7,9 +10,10 @@ FLAG_NAME = "flag.csv"
 NAMES = [PHASE_NAME, HR_NAME, SNR_NAME, FLAG_NAME]
 
 def write_metrics(metrics, folder):
-    for i in range(len(results)):
+    num = len(metrics)
+    for i in range(1):
         file_name = folder + "/" + NAMES[i]
-        write_metric(metrics, file_name)
+        write_metric(metrics[i], file_name)
     return
 
 def read_metrics(folder):
@@ -23,7 +27,7 @@ def write_metric(metric, file_name):
     """Dims are fragment-row_column"""
     dims = metric.shape
     packed_metric = pack_metric(metric)
-    with open(file_path, 'w', newline='') as csvfile:
+    with open(file_name, 'w', newline='') as csvfile:
         writer = csv.writer(csvfile, delimiter = ',')
         writer.writerow(dims)
         for i in range(packed_metric.shape[0]):

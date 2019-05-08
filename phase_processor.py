@@ -10,11 +10,13 @@ DESCRETISATION_PERIOD = 0.040
 
 def full_fragment_phase_mask(vpg):
     """For one video piece actually"""
-    sig_ref = vpg[0][0]
-    phase_mask = np.zeros((vp.shape[0:2]))
+    i_cent = int(vpg.shape[0]/2)
+    j_cent = int(vpg.shape[1]/2)
+    sig_ref = vpg[i_cent][j_cent]
+    phase_mask = np.zeros((vpg.shape[0:2]))
     for row in range(vpg.shape[0]):
         for column in range(vpg.shape[1]):
-            phase_mask[row][column] = get_frame_phase_mask(sig_ref, vpg[row][column])
+            phase_mask[row][column] = get_phase_shift(sig_ref, vpg[row][column])
     return phase_mask
 
 def get_phase_shift(sig1, sig2):
