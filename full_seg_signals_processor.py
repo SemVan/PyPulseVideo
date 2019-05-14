@@ -23,9 +23,11 @@ def all_signals_processor():
         if not os.path.isfile(contact_dir):
             mes = "fuck_blyat" + " " + contact_dir
             write_log(mes)
+            continue
 
         file_name = dir + "/" + SIGNAL_FILE
         if os.path.isfile(file_name):
+            con_sig = read_contact_file(contact_dir)
             signal = read_segmented_file(file_name)
             print("file read")
             sig_res = one_vpg_processor(signal)

@@ -38,6 +38,12 @@ def unpack_signal(packed, dim):
 
 
 def read_contact_file(filename):
+    data = []
+    with open(fileName, 'r') as f:
+        for row in f:
+            rowList = row.split(",")
+            data[0].append(rowList[0])
+            if len(rowList)==2:
+                data.append(float(rowList[1]))
 
-
-    return
+    return np.asarray(data)
