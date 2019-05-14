@@ -6,7 +6,9 @@ from metrics_io import *
 import os
 
 FILES_PATH = "./Segmented/Signals/"
+CONTACT_FILES_PATH = "./Signals/"
 SIGNAL_FILE = "signal.csv"
+CONTACT_SIGNAL_FILE = "contact.txt"
 PIECE_LENGTH = 255
 
 def all_signals_processor():
@@ -16,6 +18,12 @@ def all_signals_processor():
 
     for dir in dir_list[1:]:
         print(dir)
+        last_name = dir.split('/')
+        contact_dir = CONTACT_FILES_PATH + "/" + last_name[-1] + "/" + CONTACT_SIGNAL_FILE
+        if not os.path.isfile(contact_dir):
+            mes = "fuck_blyat" + " " + contact_dir
+            write_log(mes)
+
         file_name = dir + "/" + SIGNAL_FILE
         if os.path.isfile(file_name):
             signal = read_segmented_file(file_name)
@@ -42,5 +50,11 @@ def one_vpg_processor(vpg):
         full_snr.append(snr_mask)
         full_flag.append(flag_mask)
     return [np.asarray(full_phase), np.asarray(full_hr), np.asarray(full_snr), np.asarray(full_flag)]
+
+def write_log(message):
+    with open ("log.txt", "a+") as file:
+        file.write(message)
+
+    return
 
 all_signals_processor()

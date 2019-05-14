@@ -35,3 +35,9 @@ def unpack_signal(packed, dim):
     packed = np.asarray(packed)
     unpacked = np.reshape(packed, tuple(dim))
     return unpacked
+
+
+def read_contact_file(filename):
+
+
+    return
