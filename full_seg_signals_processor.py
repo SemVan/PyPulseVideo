@@ -56,7 +56,6 @@ def one_vpg_processor(vpg):
 def write_log(message):
     with open ("log.txt", "a+") as file:
         file.write(message)
-
     return
 
 all_signals_processor()
