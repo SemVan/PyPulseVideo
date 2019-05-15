@@ -1,34 +1,31 @@
 from matplotlib import pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 import numpy as np
-
-import numpy as np
+from classification import *
 
 PERIOD = 1/100
 WINDOW_SIZE = 1000
 
-def full_fragment_amp_procedure(vpg):
+def full_fragment_amp_procedure(vpg, con_sig):
     vpg_shape = vpg.shape
     vpg_hr = np.zeros(shape=vpg_shape[:-1])
     vpg_snr = np.zeros(shape=vpg_shape[:-1])
     vpg_flag = np.zeros(shape=vpg_shape[:-1])
     for i in range(vpg_shape[0]):
         for j in range (vpg_shape[1]): #changed shape element number
-            hr, snr, flag = one_segment_procedure(vpg[i][j])
+            hr, snr, flag = one_segment_procedure(vpg[i][j], con_sig)
             vpg_hr[i][j] = hr
             vpg_snr[i][j] = snr
             vpg_flag[i][j] = flag
     return vpg_hr, vpg_snr, vpg_flag
 
-def one_segment_procedure(segment_signal):
-    # @todo classify signal here!!!
+def one_segment_procedure(segment_signal, contact_signal):
     spectrum, freqs = get_fourier_result(segment_signal, PERIOD)
     px, py = simple_peaks(spectrum, freqs, np.arange(1,2))
     fc, fc_amp = getSpectrumCentralFrequencyAndAmp(px, py)
     SNR = get_SNR(spectrum, fc_amp)
 
-    # @todo classify signal here!!!
-    signal_flag = 1
+    signal_flag = onePairProcedure(contact_signal, segment_signal)
     return fc, SNR, signal_flag
 
 def get_fourier_result (signal, period):
