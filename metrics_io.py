@@ -11,7 +11,7 @@ NAMES = [PHASE_NAME, HR_NAME, SNR_NAME, FLAG_NAME]
 
 def write_metrics(metrics, folder):
     num = len(metrics)
-    for i in range(1):
+    for i in range(num):
         file_name = folder + "/" + NAMES[i]
         write_metric(metrics[i], file_name)
     return
@@ -35,7 +35,7 @@ def write_metric(metric, file_name):
     return
 
 def read_metric(file_name):
-    packed_sig = []
+    packed_metric = []
     dims = []
     with open(file_name, 'r') as csvfile:
         reader = csv.reader(csvfile, delimiter = ',', quoting = csv.QUOTE_NONNUMERIC)

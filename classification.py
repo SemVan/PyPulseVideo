@@ -11,7 +11,7 @@ def oneContactlessSignalPiece(signal, period):
     spectra_n = normalizeSpectrum(spectra)
     pX, pY = simple_peaks(spectra_n, freqs, np.arange(1, 2))
     a, b, Fsec_x, Fsec = getSpectrumCentralFrequencyAndAmp(pX, pY)
-    return a, b, Fsec_x, Fsec
+    return a, Fsec_x, Fsec
 
 
 def oneContactSignalPiece(signal, period):
@@ -30,8 +30,6 @@ def onePairProcedure(contact, contactless):
     contactless_cut = butter_bandpass_filter(contactless_cut, 0.5, 3, 25, 3)
 
     centralFreq, Fsx_less, Fs_less = oneContactlessSignalPiece(contactless_cut, per)
-    if (dictLess == 0):
-        continue
     contactHr, Fsx_cont, Fs_cont = oneContactSignalPiece(contact_cut, per)
 
     target = int(abs(contactHr-centralFreq)<=0.2 and abs(Fsx_cont-Fsx_less)<=0.2 and Fsx_cont>0 and  Fsx_less>0)

@@ -39,7 +39,7 @@ def normalizeSpectrum(spectra):
     return nSp
 
 def normalizeSignal(signal):
-    m = max(signal)
+    m = np.max(signal)
     new_sig = signal/m
     return new_sig
 

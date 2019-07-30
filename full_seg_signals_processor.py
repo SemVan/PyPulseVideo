@@ -8,36 +8,58 @@ import os
 FILES_PATH = "./Segmented/Signals/"
 CONTACT_FILES_PATH = "./Signals/"
 SIGNAL_FILE = "signal.csv"
-CONTACT_SIGNAL_FILE = "contact.txt"
+CONTACT_SIGNAL_FILE = "Contact.txt"
 PIECE_LENGTH = 255
+
+
+def prepare_dir_list(root_dir):
+    dir_list = []
+    for i,j,y in os.walk(FILES_PATH):
+        if not i == FILES_PATH:
+            files_list = os.listdir(i)
+            if not ("phase.csv" in files_list or "flag.csv" in files_list):
+                dir_list.append(i)
+    return dir_list
 
 def all_signals_processor():
     dir_list = []
-    for i,j,y in os.walk(FILES_PATH):
-        dir_list.append(i)
+    dir_list = prepare_dir_list(FILES_PATH)
+    for dir in dir_list:
+        print(dir)
+    input()
+    # input()
+    # for i,j,y in os.walk(FILES_PATH):
+    #     dir_list.append(i)
 
+    print("Directory listing done")
     for dir in dir_list[1:]:
         print(dir)
         last_name = dir.split('/')
-        contact_dir = CONTACT_FILES_PATH + "/" + last_name[-1] + "/" + CONTACT_SIGNAL_FILE
+        contact_dir = CONTACT_FILES_PATH + last_name[-1] + "/" + CONTACT_SIGNAL_FILE
+        file_name = FILES_PATH + last_name[-1] + '/' + "signal.csv"
         if not os.path.isfile(contact_dir):
             mes = "No contact file blya " + " " + contact_dir
+            print(mes)
             write_log(mes)
             continue
 
-        file_name = dir + "/" + SIGNAL_FILE
         if os.path.isfile(file_name):
             con_sig = read_contact_file(contact_dir)
             signal = read_segmented_file(file_name)
             print("file read")
             sig_res = one_vpg_processor(signal, con_sig)
+            print()
+            print("Gonna save to ", sig_res)
+            print()
             write_metrics(sig_res, dir)
+        else:
+            print("suck my dict")
     return
 
 def one_vpg_processor(vpg, contact_signal):
     frame_size = vpg.shape[0]
     if frame_size != len(contact_signal):
-        mes = "different length blya "
+        mes = "different length blya epta"
         write_log(mes)
     full_phase = []
     full_hr = []
@@ -50,7 +72,7 @@ def one_vpg_processor(vpg, contact_signal):
         contact_piece = contact_signal[i:i+PIECE_LENGTH]
         vpg_piece_weighted = get_channels_sum(vpg_piece_3ch) #changes shape
         phase_mask = full_fragment_phase_mask(vpg_piece_weighted)
-        hr_mask, snr_mask, flag_mask = full_fragment_amp_procedure(vpg_piece_weighted)
+        hr_mask, snr_mask, flag_mask = full_fragment_amp_procedure(vpg_piece_weighted, contact_piece)
         full_phase.append(phase_mask)
         full_hr.append(hr_mask)
         full_snr.append(snr_mask)
