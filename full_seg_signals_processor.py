@@ -12,18 +12,22 @@ CONTACT_SIGNAL_FILE = "Contact.txt"
 PIECE_LENGTH = 255
 
 
-def prepare_dir_list(root_dir):
+def prepare_dir_list(root_dir, force = False):
     dir_list = []
     for i,j,y in os.walk(FILES_PATH):
         if not i == FILES_PATH:
             files_list = os.listdir(i)
-            if not ("phase.csv" in files_list or "flag.csv" in files_list):
+            if force:
                 dir_list.append(i)
+            else:
+                if not ("phase.csv" in files_list or "flag.csv" in files_list):
+                    dir_list.append(i)
+
     return dir_list
 
 def all_signals_processor():
     dir_list = []
-    dir_list = prepare_dir_list(FILES_PATH)
+    dir_list = prepare_dir_list(FILES_PATH, force = True)
     for dir in dir_list:
         print(dir)
     input()

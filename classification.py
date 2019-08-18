@@ -32,7 +32,10 @@ def onePairProcedure(contact, contactless):
     centralFreq, Fsx_less, Fs_less = oneContactlessSignalPiece(contactless_cut, per)
     contactHr, Fsx_cont, Fs_cont = oneContactSignalPiece(contact_cut, per)
 
-    target = int(abs(contactHr-centralFreq)<=0.2 and abs(Fsx_cont-Fsx_less)<=0.2 and Fsx_cont>0 and  Fsx_less>0)
+    true_equal = abs(contactHr - centralFreq)<=0.2 and abs(Fsx_cont - Fsx_less)<=0.2
+    quasi_equal = abs(contactHr-Fsx_less)<=0.2 and abs(Fsx_cont- centralFreq)<=0.2
+
+    target = int( (true_equal or quasi_equal) and Fsx_cont>0 and  Fsx_less>0)
 
     if target >= 0.9:
         target = 1
