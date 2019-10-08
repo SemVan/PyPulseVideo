@@ -56,42 +56,46 @@ def geometrical_and_color(frame,rectangle):
     rect=dlib.rectangle(x,y,x+w,y+h)
     shape = predictor(gray, rect)
     shape = face_utils.shape_to_np(shape)
+    shape = np.int32(shape)
     
     #get face contours and create mask
-    lEye=shape[36:42,:]
-    rEye=shape[42:48,:]
-    mouth=shape[48:60,:]
-    edge=np.concatenate((np.array(shape[0:17,:]),np.array(shape[26:16:-1,:])))
-    upperSide=np.concatenate((np.array([[x,y]]),np.array(shape[17:27,:]),np.array([[x+w,y]])))
-    lowerSide=np.concatenate((np.array([[x,y]]),np.array([shape[17,:]]),np.array(shape[0:17,:]),
-                              np.array([shape[26,:]]),np.array([[x+w,y]])))
+    lEye = shape[36:42,:]
+    rEye = shape[42:48,:]
+    mouth = shape[48:60,:]
+    edge=np.concatenate((shape[0:17,:],shape[26:16:-1,:]))
+    upperSide=np.concatenate(([[x,y]],shape[17:27,:],[[x+w,y]]))
+    lowerSide=np.concatenate(([[x,y]],[shape[17,:]],shape[0:17,:],[shape[26,:]],[[x+w,y]]))
+    
     mask=np.zeros(frame.shape)
-    cv2.fillPoly(mask,(np.int32([edge]),np.int32([mouth]),np.int32([lEye]),np.int32([rEye])),(1,1,1))
+    cv2.fillPoly(mask,(edge,mouth,lEye,rEye),(1,1,1))
     
     # get face color distribution
-    B,G,R=get_BGR(image,mask)
+    indices=np.where(mask>0)
+    BGR=image[indices]
 
     # linear approximation
-    a1,a2,b1,b2=get_baseline(B,G,R)
+    vec,point=get_baseline(BGR)
 
     # get mean squared distance to the axis
-    mean=get_meanDistances2(a1,a2,b1,b2,B,G,R)
+    mean=get_meanDistances2(vec,point,BGR)
 
     # calculate distances to the axis
-    distances=get_distance(a1,a2,b1,b2,image)
+    distances=get_distance(vec,point,image)
+    #cv2.imshow("Distances",1-distances/np.max(distances))
+    #cv2.waitKey(0)
 
     # highlight area of interest
     maskDist=np.zeros(distances.shape)
-    cv2.fillPoly(maskDist,[np.int32(upperSide)],(1,1,1))
+    cv2.fillPoly(maskDist,[upperSide],(1,1,1))
     distances=distances*maskDist
     maskIm=np.zeros(image.shape)
-    cv2.fillPoly(maskIm,[np.int32(lowerSide), np.int32([mouth]),np.int32([lEye]),np.int32([rEye])],(1,1,1))
-    maskGr=np.ones(image.shape)-maskIm
+    cv2.fillPoly(maskIm,(lowerSide, mouth, lEye, rEye),(1,1,1))
 
     # highlight remote pixels
     indicesHighlight=np.where(distances>1*mean**0.5)
     maskIm[indicesHighlight]=0
-    imNew=np.uint8(image*maskIm)#+ground*maskGr)
+    maskGr=np.ones(image.shape)-maskIm
+    imNew=np.uint8(image*maskIm+ground*maskGr)
 
     # calculate mean intensity
     indicesFace=np.where(maskIm>0)
@@ -105,7 +109,7 @@ def geometrical_and_color(frame,rectangle):
     meanIntensity=meanG/(meanR+meanB)
     
     # show image
-    #cv2.imshow("GC",imNew)
+    #cv2.imshow("geometrical and color output",imNew)
     #cv2.waitKey(0)
     return meanIntensity
 
@@ -253,41 +257,29 @@ def detect_face(image):
         return only_face, faces[0]
     return image, []
 
-def get_BGR(image,mask):
-    indices=np.where(mask>0)
-    ind=np.transpose(np.int32(indices[0:2]))
-    B=[]
-    G=[]
-    R=[]
-    for (i,j) in ind:
-        B.append(image[i,j,0])
-        G.append(image[i,j,1])
-        R.append(image[i,j,2])
-    return B,G,R
 
-def get_distance(a1,a2,b1,b2,image):
+def get_distance(vec,point,image):
     image=np.int32(image)
-    b=-1
-    g=a1*b+b1
-    r=a2*b+b2
-    distance2=((a1*(image[:,:,2]-r)-a2*(image[:,:,1]-g))**2+(a2*(image[:,:,0]-b)-(image[:,:,2]-r))**2+
-    ((image[:,:,1]-g)-a1*(image[:,:,0]-b))**2)
-    distance2=distance2/(1+a1**2+a2**2)
-    distance=distance2**0.5
+    distance2=np.cross([[vec]],image-point,axis=2)
+    distance=np.linalg.norm(distance2,axis=2)
     return distance
 
-def get_meanDistances2(a1,a2,b1,b2,B,G,R):
-    B=np.int32(B)
-    G=np.int32(G)
-    R=np.int32(R)
-    b=-1
-    g=a1*b+b1
-    r=a2*b+b2
-    distances2=(a1*(R-r)-a2*(G-g))**2+(a2*(B-b)-(R-r))**2+((G-g)-a1*(B-b))**2
-    distances2=distances2/(1+a1**2+a2**2)
-    return np.mean(distances2)
 
-def get_baseline(B,G,R):
+def get_meanDistances2(vec,point,BGR):
+    B=BGR[::3]
+    G=BGR[1::3]
+    R=BGR[2::3]
+    BGR=np.int32([B,G,R])
+    BGR=np.transpose(BGR)
+    distances2=np.cross([vec],BGR-point,axis=1)
+    distances=np.linalg.norm(distances2,axis=1)
+    return np.mean(distances**2)
+
+
+def get_baseline(BGR):
+    B=BGR[::3]
+    G=BGR[1::3]
+    R=BGR[2::3]
     B = np.array(B)
     G = np.array(G)
     R = np.array(R)
@@ -300,8 +292,8 @@ def get_baseline(B,G,R):
     indGm=np.where(G<g)[0]
     indRM=np.where(R>r)[0]
     indRm=np.where(R<r)[0]
-    BM=B[np.int32(indBM)]
-    Bm=B[np.int32(indBm)]
+    BM=B[indBM]
+    Bm=B[indBm]
     GM=G[indGM]
     Gm=G[indGm]
     RM=R[indRM]
@@ -312,8 +304,8 @@ def get_baseline(B,G,R):
     y1=np.mean(GM)
     z0=np.mean(Rm)
     z1=np.mean(RM)
-    a1=(y0-y1)/(x0-x1)
-    a2=(z0-z1)/(x0-x1)
-    b1=y0-a1*x0
-    b2=z0-a2*x0
-    return a1,a2,b1,b2
+    vec=np.array([x1-x0,y1-y0,z1-z0])
+    normale=np.linalg.norm(vec)
+    vec=vec/normale
+    point=[x0,y0,z0]
+    return vec,point
