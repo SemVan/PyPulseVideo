@@ -43,6 +43,7 @@ def all_signals_processor():
         file_name = FILES_PATH + last_name[-1] + '/' + "signal.csv"
         if not os.path.isfile(contact_dir):
             mes = "No contact file blya " + " " + contact_dir
+            input()
             print(mes)
             write_log(mes)
             continue
@@ -51,6 +52,7 @@ def all_signals_processor():
             con_sig = read_contact_file(contact_dir)
             signal = read_segmented_file(file_name)
             print("file read")
+            input()
             sig_res = one_vpg_processor(signal, con_sig)
             print()
             print("Gonna save to ", sig_res)
@@ -58,6 +60,7 @@ def all_signals_processor():
             write_metrics(sig_res, dir)
         else:
             print("suck my dict")
+            imput()
     return
 
 def one_vpg_processor(vpg, contact_signal):

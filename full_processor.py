@@ -6,6 +6,7 @@ from file_writer import *
 VIDEO_PATH = "./Videos/Measurements/"
 FILES_PATH = "./Videos/Signals/"
 
+what_to_read = []
 for filename in os.listdir(VIDEO_PATH):
     if filename.endswith(".avi"):
         name = filename[:-4]
@@ -23,3 +24,7 @@ for filename in os.listdir(VIDEO_PATH):
             color_path = text_path +'/'+"color.txt"
             write_file(geom_path, geom)
             write_file(color_path, color)
+            what_to_read.append(text_path +'/' + '\n')
+with open("logger.txt", 'w') as f:
+    for line in what_to_read:
+        f.write()
