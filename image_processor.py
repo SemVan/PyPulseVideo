@@ -10,108 +10,111 @@ predictor = dlib.shape_predictor(PREDICTOR_PATH)
 cascade_path='haarcascade_frontalface_alt.xml'
 cascade = cv2.CascadeClassifier(cascade_path)
 
-#imagePath = r"faces\3.jpg"
-#image = cv2.imread(imagePath)
-#geom,color,intensity = full_frame_procedure(image)
 
 def full_frame_procedure(frame):
     start = dt.datetime.now()
     face_frame, rectangle = detect_face(frame)
 
-    if rectangle.all() == None:
+    if rectangle is None:
         print("returning None")
-        return None, None
+        return None, None, None
     face_stop = dt.datetime.now()
     face_el = face_stop-start
-    print("face detection " + str(face_el.microseconds/1000))
+    # print("face detection " + str(face_el.microseconds/1000))
     geom = geometrical_frame_procedure(frame, rectangle)
     geom_stop = dt.datetime.now()
     geom_el = geom_stop-face_stop
-    print("geometrical processing " + str(geom_el.microseconds/1000))
+    # print("geometrical processing " + str(geom_el.microseconds/1000))
 
     color=[]
-    #color = colorful_frame_procedure(face_frame, frame)
+    color = colorful_frame_procedure(face_frame, frame)
     color_stop = dt.datetime.now()
     color_el = color_stop-geom_stop
-    print("color processing " + str(color_el.microseconds/1000))
-    
-    intensity=geometrical_and_color(frame,rectangle)
+    # print("color processing " + str(color_el.microseconds/1000))
+
+    colgeom = geometrical_and_color(frame,rectangle)
     geom_color_stop = dt.datetime.now()
     geom_color_el = geom_color_stop-color_stop
-    print("geometrical & color processing " + str(geom_color_el.microseconds/1000))
+    # print("geometrical & color processing " + str(geom_color_el.microseconds/1000))
     full_el = geom_color_stop-start
-    print("full processing " + str(full_el.microseconds/1000))
-    print()
-    return geom, color, intensity
+    # print("full processing " + str(full_el.microseconds/1000))
+    # print()
+    return geom, color, colgeom
 
-def geometrical_and_color(frame,rectangle):
-    imNew=frame
+def geometrical_and_color(frame, rectangle):
+    image = frame
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     # create the ground color
-    ground=np.zeros(frame.shape)
-    ground[:,0::4,1]=180
-    
+
+    ground = np.zeros(image.shape)
+    ground[:,0::4,1] = 180
+
     #get points
-    x,y,w,h=rectangle
-    rect=dlib.rectangle(x,y,x+w,y+h)
+    x,y,w,h = rectangle
+    rect = dlib.rectangle(x,y,x+w,y+h)
     shape = predictor(gray, rect)
     shape = face_utils.shape_to_np(shape)
     shape = np.int32(shape)
-    
+
     #get face contours and create mask
     lEye = shape[36:42,:]
     rEye = shape[42:48,:]
     mouth = shape[48:60,:]
-    edge=np.concatenate((shape[0:17,:],shape[26:16:-1,:]))
-    upperSide=np.concatenate(([[x,y]],shape[17:27,:],[[x+w,y]]))
-    lowerSide=np.concatenate(([[x,y]],[shape[17,:]],shape[0:17,:],[shape[26,:]],[[x+w,y]]))
-    
+    edge = np.concatenate((shape[0:17,:],shape[26:16:-1,:]))
+    upperSide = np.concatenate(([[x,y]],shape[17:27,:],[[x+w,y]]))
+    lowerSide = np.concatenate(([[x,y]],[shape[17,:]],shape[0:17,:],[shape[26,:]],[[x+w,y]]))
+
     mask=np.zeros(frame.shape)
     cv2.fillPoly(mask,(edge,mouth,lEye,rEye),(1,1,1))
-    
+
     # get face color distribution
-    indices=np.where(mask>0)
-    BGR=image[indices]
+    indices = np.where(mask>0)
+    BGR = image[indices]
 
     # linear approximation
-    vec,point=get_baseline(BGR)
+    vec,point = get_baseline(BGR)
 
     # get mean squared distance to the axis
-    mean=get_meanDistances2(vec,point,BGR)
+    mean = get_meanDistances2(vec,point,BGR)
+    mean = mean ** 0.5
+    mean = 10
 
     # calculate distances to the axis
-    distances=get_distance(vec,point,frame)
+
+    distances = get_distance(vec,point, image)
     #cv2.imshow("Distances",1-distances/np.max(distances))
     #cv2.waitKey(0)
 
     # highlight area of interest
-    maskDist=np.zeros(distances.shape)
+    maskDist = np.zeros(distances.shape)
     cv2.fillPoly(maskDist,[upperSide],(1,1,1))
-    distances=distances*maskDist
-    maskIm=np.zeros(image.shape)
+    distances = distances*maskDist
+    maskIm = np.zeros(image.shape)
     cv2.fillPoly(maskIm,(lowerSide, mouth, lEye, rEye),(1,1,1))
 
     # highlight remote pixels
-    indicesHighlight=np.where(distances>1*mean**0.5)
+    indicesHighlight=np.where(
+    distances>mean)
     maskIm[indicesHighlight]=0
-    maskGr=np.ones(frame.shape)-maskIm
-    imNew=np.uint8(frame*maskIm+ground*maskGr)
+
+    maskGr=np.ones(image.shape)-maskIm
+    imNew=np.uint8(image*maskIm)#+ground*maskGr)
 
     # calculate mean intensity
-    indicesFace=np.where(maskIm>0)
-    intensities=imNew[indicesFace]
-    intB=intensities[0::3]
-    intG=intensities[1::3]
-    intR=intensities[2::3]
-    meanB=np.mean(intB)
-    meanG=np.mean(intG)
-    meanR=np.mean(intR)
-    meanIntensity=meanG/(meanR+meanB)
-    
+    # indicesFace=np.where(maskIm>0)
+    # intensities=imNew[indicesFace]
+    # intB=intensities[0::3]
+    # intG=intensities[1::3]
+    # intR=intensities[2::3]
+    # meanB=np.mean(intB)
+    # meanG=np.mean(intG)
+    # meanR=np.mean(intR)
+    # meanIntensity=meanG/(meanR+meanB)
+
     # show image
-    #cv2.imshow("geometrical and color output",imNew)
-    #cv2.waitKey(0)
-    return meanIntensity
+    # cv2.imshow("geometrical and color output", imNew)
+    # cv2.waitKey(10)
+    return get_sum_channels(imNew)
 
 def geometrical_frame_procedure(frame, rect):
     im_grey = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
@@ -131,10 +134,8 @@ def geometrical_frame_procedure(frame, rect):
     false_contours.append(mouth)
 
     final_img = fill_black_out_contours(frame, true_contours, false_contours)
-    r, g, b = get_sum_channels(final_img)
-    super_final = find_skin_regions(frame, rect, r, g, b)
-    #cv2.imshow("hgkjg", final_img)
-    #cv2.waitKey(0)
+    # cv2.imshow("hgkjg", final_img)
+    # cv2.waitKey(0)
     return get_sum_channels(final_img)
 
 
@@ -151,7 +152,9 @@ def find_skin_regions(img, face, rd, gr, bl):
     return final
 
 def colorful_frame_procedure(face, frame):
-    skin = detect_skin(face, frame)
+    img = frame.copy()
+    fc = face.copy()
+    skin = detect_skin(fc, img)
     # cv2.imshow("color", skin)
     # cv2.waitKey(10)
     return get_sum_channels(skin)
@@ -235,8 +238,8 @@ def detect_skin(face, background):
     imageYCrCb = cv2.cvtColor(face,cv2.COLOR_BGR2YCR_CB)
     skinRegion = cv2.inRange(imageYCrCb,min_YCrCb,max_YCrCb)
     skin = cv2.bitwise_and(face, face, mask=skinRegion)
-    #image, contours, hierarchy = cv2.findContours(skinRegion, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-    image, contours = cv2.findContours(skinRegion, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    image, contours, hierarchy = cv2.findContours(skinRegion, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    # image, contours = cv2.findContours(skinRegion, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     for i, c in enumerate(contours):
         area = cv2.contourArea(c)
         if area > 2000:

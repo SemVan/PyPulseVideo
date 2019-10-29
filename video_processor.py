@@ -14,13 +14,15 @@ def full_video_file_procedure(file_name):
 
     geometrical = []
     colorful = []
+    colgeom = []
     while cap.isOpened():
         ret, img = cap.read()
         if ret == False:
             break
-        g, c = full_frame_procedure(img)
+        g, c, cg = full_frame_procedure(img)
         if g == None:
-            return None, None
+            return None, None, None
         geometrical.append(g)
         colorful.append(c)
-    return geometrical, colorful
+        colgeom.append(cg)
+    return geometrical, colorful, colgeom

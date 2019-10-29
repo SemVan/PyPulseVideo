@@ -6,7 +6,7 @@ from metrics_io import *
 import os
 
 FILES_PATH = "./Segmented/Signals/"
-CONTACT_FILES_PATH = "./Signals/"
+CONTACT_FILES_PATH = "./Videos/CGCG13_10_19/"
 SIGNAL_FILE = "signal.csv"
 CONTACT_SIGNAL_FILE = "Contact.txt"
 PIECE_LENGTH = 255
@@ -25,13 +25,22 @@ def prepare_dir_list(root_dir, force = False):
 
     return dir_list
 
+
+def prepare_dir_list_from_logger(logname):
+    dir_list = []
+    with open(logname) as logger:
+        for row in logger:
+            dir_list.append(row[:-1])
+
+    return dir_list
+
 def all_signals_processor():
     dir_list = []
-    dir_list = prepare_dir_list(FILES_PATH, force = True)
+    # dir_list = prepare_dir_list_from_logger(FILES_PATH, force = True)
+    dir_list = prepare_dir_list_from_logger("seglogger.txt")
     for dir in dir_list:
         print(dir)
-    input()
-    # input()
+    print()
     # for i,j,y in os.walk(FILES_PATH):
     #     dir_list.append(i)
 
@@ -39,8 +48,11 @@ def all_signals_processor():
     for dir in dir_list[1:]:
         print(dir)
         last_name = dir.split('/')
-        contact_dir = CONTACT_FILES_PATH + last_name[-1] + "/" + CONTACT_SIGNAL_FILE
-        file_name = FILES_PATH + last_name[-1] + '/' + "signal.csv"
+        contact_dir = CONTACT_FILES_PATH + last_name[-1][:-4] + "/" + CONTACT_SIGNAL_FILE
+        final_dir = FILES_PATH + last_name[-1][:-4]
+        file_name = final_dir + '/' + "signal.csv"
+
+
         if not os.path.isfile(contact_dir):
             mes = "No contact file blya " + " " + contact_dir
             print(mes)
@@ -55,9 +67,10 @@ def all_signals_processor():
             print()
             print("Gonna save to ", sig_res)
             print()
-            write_metrics(sig_res, dir)
+            write_metrics(sig_res, final_dir)
         else:
             print("suck my dict")
+
     return
 
 def one_vpg_processor(vpg, contact_signal):
