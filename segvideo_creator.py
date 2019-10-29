@@ -1,6 +1,6 @@
 import cv2
 from metrics_io import*
-from image_processor import*
+from image_processor import *
 import numpy as np
 from matplotlib import pyplot as plt
 from segmented_io import *
@@ -17,46 +17,47 @@ hor = [3, 4, 5, 6, 7, 8, 9, 10 ,11, 12, 13]
 
 
 def make_edited_video(video_name, video_edited_name, metric_path):
-    
+
     # Correctly open .csv files: for this I need an opener in metrics
     metrics = read_metrics(metric_path)
     phase = metrics[0]
     hr = metrics[1]
     snr = metrics[2]
     flag = metrics[3]
-    
+
     frames, Y, X = flag.shape
     print(X)
     print(Y)
     print(frames)
-    
+
     # Read source video
     cap = cv2.VideoCapture(video_name)
 
     if not(cap.isOpened()):
         print("video did not open (/Measured/..)")
         return []
-    
+
     # Get frame size
     ret, img = cap.read()
     height,width,channels = img.shape
     print(width)
     print(height)
     print(channels)
-    
+
     # get handler to VideoWriter
     fourcc = cv2.VideoWriter_fourcc(*'DIVX')
     out = cv2.VideoWriter(video_edited_name, fourcc, 30, (width,height))
-    
+
     frame_number = 0
-    
+
     while (cap.isOpened() and frame_number<frames):
         st = dt.datetime.now()
         ret, img = cap.read()
         if ret == False:
             break
         frame_number += 1
-        x, y = get_segmentation_grid(img)
+        x, y, face_dots = get_segmentation_grid(img)
+        img = highlight_face(img, face_dots)
         if x == []:
             x = []
             y = []
@@ -69,9 +70,11 @@ def make_edited_video(video_name, video_edited_name, metric_path):
                     rect = np.array([[x[i][0,0],y[j][0,0]],[x[i][0,0],y[j+1][0,0]],[x[i+1][0,0],y[j+1][0,0]],[x[i+1][0,0],y[j][0,0]]])
                     print(rect)
                     cv2.fillPoly(mask, np.int32([rect]), (fl,fl,fl))
-        #cv2.imshow("",mask)
-        #cv2.waitKey(0)
         img = img*np.uint8(mask)
+        # opacity = 0.5
+        # cv2.addWeighted(np.uint8(mask), opacity, img, 1 - opacity, 0, img)
+        cv2.imshow("",img)
+        cv2.waitKey(5)
         out.write(img)
         frametime = dt.datetime.now() - st
         print(frametime.microseconds/1000)
@@ -82,15 +85,24 @@ def make_edited_video(video_name, video_edited_name, metric_path):
 
 def get_segmentation_grid(img):
     face_frame, rectangle = detect_face(img)
-    
+
     if len(rectangle) == 0:
         return []
     im_grey = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     points = get_landmarks(img, rectangle)
+    face = get_face_contour(points)
 
     x = points[hor,0]
     y = points[ver,1]
     #print(x)
     #print(y)
-    
-    return x, y
+
+    return x, y, face
+
+def highlight_face(img, face):
+    false_mask = np.full(img.shape, 0, img.dtype)
+    true_color = [255, 255, 255]
+    cv2.fillPoly(false_mask, [face], true_color)
+    opacity = 0.2
+    cv2.addWeighted(false_mask, opacity, img, 1 - opacity, 0, img)
+    return img
