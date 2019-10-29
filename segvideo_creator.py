@@ -20,12 +20,15 @@ def make_edited_video(video_name, video_edited_name, metric_path):
     
     # Correctly open .csv files: for this I need an opener in metrics
     metrics = read_metrics(metric_path)
-    phase = metrics(0)
-    hr = metrics(1)
-    snr = metrics(2)
-    flag = metrics(3)
+    phase = metrics[0]
+    hr = metrics[1]
+    snr = metrics[2]
+    flag = metrics[3]
     
-    frames, X, Y = flag.shape
+    frames, Y, X = flag.shape
+    print(X)
+    print(Y)
+    print(frames)
     
     # Read source video
     cap = cv2.VideoCapture(video_name)
@@ -36,10 +39,13 @@ def make_edited_video(video_name, video_edited_name, metric_path):
     
     # Get frame size
     ret, img = cap.read()
-    width,height,channels = img.shape
+    height,width,channels = img.shape
+    print(width)
+    print(height)
+    print(channels)
     
     # get handler to VideoWriter
-    fourcc = cv2.VideoWriter_fourcc(*'XVID')
+    fourcc = cv2.VideoWriter_fourcc(*'DIVX')
     out = cv2.VideoWriter(video_edited_name, fourcc, 30, (width,height))
     
     frame_number = 0
@@ -55,11 +61,17 @@ def make_edited_video(video_name, video_edited_name, metric_path):
             x = []
             y = []
         # Теперь модифицируем кадр img, закрашивая на нём отдельные области
-        if len(x)>0:
-            for i in range(len(x)-1):
-                for j in range(len(y)-1):
-                    img[x[i]:x[i+1],y[j]:y[j+1],:] *= flag(frame_number, i, j)
-        
+        mask = np.ones(img.shape)
+        if len(x[0])>0:
+            for i in range(X-1):
+                for j in range(Y-1):
+                    fl = (flag[frame_number-1, j, i]+1)/2
+                    rect = np.array([[x[i][0,0],y[j][0,0]],[x[i][0,0],y[j+1][0,0]],[x[i+1][0,0],y[j+1][0,0]],[x[i+1][0,0],y[j][0,0]]])
+                    print(rect)
+                    cv2.fillPoly(mask, np.int32([rect]), (fl,fl,fl))
+        #cv2.imshow("",mask)
+        #cv2.waitKey(0)
+        img = img*np.uint8(mask)
         out.write(img)
         frametime = dt.datetime.now() - st
         print(frametime.microseconds/1000)
@@ -76,7 +88,9 @@ def get_segmentation_grid(img):
     im_grey = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     points = get_landmarks(img, rectangle)
 
-    x = points[hor][0,0]
-    y = points[ver][0,1]
+    x = points[hor,0]
+    y = points[ver,1]
+    #print(x)
+    #print(y)
     
     return x, y
