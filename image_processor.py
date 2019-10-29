@@ -48,7 +48,7 @@ def geometrical_and_color(frame,rectangle):
     imNew=frame
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     # create the ground color
-    ground=np.zeros(image.shape)
+    ground=np.zeros(frame.shape)
     ground[:,0::4,1]=180
     
     #get points
@@ -80,7 +80,7 @@ def geometrical_and_color(frame,rectangle):
     mean=get_meanDistances2(vec,point,BGR)
 
     # calculate distances to the axis
-    distances=get_distance(vec,point,image)
+    distances=get_distance(vec,point,frame)
     #cv2.imshow("Distances",1-distances/np.max(distances))
     #cv2.waitKey(0)
 
@@ -94,8 +94,8 @@ def geometrical_and_color(frame,rectangle):
     # highlight remote pixels
     indicesHighlight=np.where(distances>1*mean**0.5)
     maskIm[indicesHighlight]=0
-    maskGr=np.ones(image.shape)-maskIm
-    imNew=np.uint8(image*maskIm+ground*maskGr)
+    maskGr=np.ones(frame.shape)-maskIm
+    imNew=np.uint8(frame*maskIm+ground*maskGr)
 
     # calculate mean intensity
     indicesFace=np.where(maskIm>0)
