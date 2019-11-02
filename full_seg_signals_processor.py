@@ -6,7 +6,7 @@ from metrics_io import *
 import os
 
 FILES_PATH = "./Segmented/Signals/"
-CONTACT_FILES_PATH = "./Videos/CGCG13_10_19/"
+CONTACT_FILES_PATH = "./Signals/"
 SIGNAL_FILE = "signal.csv"
 CONTACT_SIGNAL_FILE = "Contact.txt"
 PIECE_LENGTH = 255

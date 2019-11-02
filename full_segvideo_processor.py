@@ -7,8 +7,8 @@ from segmentor import *
 
 
 
-VIDEO_PATH = "./Videos/Measurements/"
-FILES_PATH = "./Segmented/Signals_new/"
+VIDEO_PATH = "./Measurements/"
+FILES_PATH = "./Segmented/Signals/"
 FILE_NAME = "signal.csv"
 
 loglist = ["ab", "cd"]
