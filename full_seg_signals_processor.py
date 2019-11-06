@@ -50,7 +50,7 @@ def all_signals_processor():
         last_name = dir.split('/')
         contact_dir = CONTACT_FILES_PATH + last_name[-1][:-4] + "/" + CONTACT_SIGNAL_FILE
         final_dir = FILES_PATH + last_name[-1][:-4]
-        file_name = final_dir + '/' + "signal.csv"
+        file_name = final_dir + "/" + "signal.csv"
 
 
         if not os.path.isfile(contact_dir):
