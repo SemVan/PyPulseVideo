@@ -14,6 +14,9 @@ def full_fragment_amp_procedure(vpg, con_sig):
     for i in range(vpg_shape[0]):
         for j in range (vpg_shape[1]): #changed shape element number
             hr, snr, flag = one_segment_procedure(vpg[i][j], con_sig)
+            if flag:
+                plt.plot(range(len(vpg[i][j])), vpg[i][j])
+                plt.show()
             vpg_hr[i][j] = hr
             vpg_snr[i][j] = snr
             vpg_flag[i][j] = flag

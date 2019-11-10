@@ -3,8 +3,8 @@ from video_processor import *
 import time
 from file_writer import *
 
-VIDEO_PATH = "./Videos/Measurements/"
-FILES_PATH = "./Videos/CGCG13_10_19/"
+VIDEO_PATH = "./Metrological/Int_videos/"
+FILES_PATH = "./Metrological/Intensity/"
 
 what_to_read = []
 for filename in os.listdir(VIDEO_PATH):
