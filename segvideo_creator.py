@@ -12,6 +12,8 @@ import time
 float_formatter = lambda x: "%.3f" % x
 np.set_printoptions(formatter={'float_kind':float_formatter})
 
+colormap = plt.get_cmap('rainbow')
+
 ver =  [6, 5, 57, 50, 33, 30, 29, 28]
 hor = [3, 4, 5, 6, 7, 8, 9, 10 ,11, 12, 13]
 
@@ -25,11 +27,21 @@ def make_edited_video(video_name, video_edited_name, metric_path):
     snr = metrics[2]
     flag = metrics[3]
     
+    maxSNR = np.max(snr)
+    minSNR = np.min(snr)
+    SNR = maxSNR - minSNR
+    
+    print('Предельные значения SNR')
+    print(maxSNR)
+    print(minSNR)
+    
     flag = filter_flag(flag)
 
     frames, Y, X = flag.shape
+    print('Оси сегментирующей сетки')
     print(X)
     print(Y)
+    print('Число кадров')
     print(frames)
 
     # Read source video
@@ -42,8 +54,10 @@ def make_edited_video(video_name, video_edited_name, metric_path):
     # Get frame size
     ret, img = cap.read()
     height,width,channels = img.shape
+    print('Размеры кадра')
     print(width)
     print(height)
+    print('Число каналов')
     print(channels)
 
     # get handler to VideoWriter
@@ -77,16 +91,29 @@ def make_edited_video(video_name, video_edited_name, metric_path):
             for i in range(X):
                 for j in range(Y):
                     fl = (flag[frame_number-1, Y-1-j, i]+1)/2
-                    # rect = np.array([[x[i][0,0],y[j][0,0]],[x[i][0,0],y[j+1][0,0]],[x[i+1][0,0],y[j+1][0,0]],[x[i+1][0,0],y[j][0,0]]])
-                    # print(rect)
+                    sn = snr[frame_number-1, Y-1-j, i]
+                    sn = (maxSNR-sn)/SNR
                     if fl>0:
-                        cv2.rectangle(img,(x[i][0,0],y[j][0,0]),(x[i+1][0,0],y[j+1][0,0]),(0,255*fl,0))
-                    # cv2.fillPoly(mask, np.int32([rect]), (fl,fl,fl))
+                        col = colormap(sn)
+                        color = np.array(col)*255
+                        r = int(color[2])
+                        g = int(color[1])
+                        b = int(color[0])
+                        x1 = int(x[i][0,0])
+                        y1 = int(y[j][0,0])
+                        start = (x1,y1)
+                        x2 = int(x[i+1][0,0])
+                        y2 = int(y[j+1][0,0])
+                        final = (x2,y2)
+                        color = (b,g,r)
+                        cv2.rectangle(img,start,final,color)
         # img = img*np.uint8(mask)
         # opacity = 0.5
         # cv2.addWeighted(np.uint8(mask), opacity, img, 1 - opacity, 0, img)
         # cv2.imshow("",img)
         # cv2.waitKey(5)
+        
+        
         out.write(img)
         frametime = dt.datetime.now() - st
         # print(frametime.microseconds/1000)
@@ -133,4 +160,3 @@ def filter_flag(flag):
                     flag[i,y,x] = 1
                 prev = flag[i,y,x]
     return flag
-                
