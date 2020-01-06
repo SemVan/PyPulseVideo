@@ -6,10 +6,10 @@ import json
 
 FILES_PATH = "./Metrological/Intensity/"
 CONTACT_FILES_PATH = "./Metrological/Intensity/"
-SIGNAL_FILE = "signal_int_1.csv"
+SIGNAL_FILE = "signal_int.csv"
 CONTACT_SIGNAL_FILE = "Contactless.txt"
 PIECE_LENGTH = 255
-
+ALGO_NAME = "net"
 
 def prepare_dir_list(root_dir):
     dir_list = []
@@ -51,7 +51,8 @@ def full_metrics_processor():
         print("TRUE PERCENTAGE BY FRAMES ", cnt / flag.shape[0])
         print()
         tp = cnt / flag.shape[0]
-        dir_map.append({"dir": dir, "res": tp})
+        dir_map.append({dir: {"net": tp}})
+    write_json('distances_1d_net.json', dir_map)
     print("TOTAL TRUE ", true_sum_flag)
     print("TOTAL FRAGMENTS ", full_summ_frag)
     print("SIGNAL COUNTER ", len(dir_list))
@@ -61,6 +62,9 @@ def full_metrics_processor():
     with open ("intensity_net_1.json", 'w') as f:
         json.dump(dir_map, f)
 
-
+def write_json(filename, data):
+    with open(filename, 'w') as f:
+        json.dump(data, f)
+    return
 
 full_metrics_processor()

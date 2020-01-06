@@ -9,14 +9,16 @@ from matplotlib import pyplot as plt
 from scipy.stats import ttest_ind
 import json
 
-LOG_PATH = "logger.txt"
+LOG_PATH = "logger_less_dist.txt"
 COLOR_FILE = "color.txt"
 GEOM_FILE = "geom.txt"
 COLGEOM_FILE = "colgeom.txt"
 CONTACT_SIGNAL_FILE = "Contactless.txt"
+CONTACT_FILE = "Contact.txt"
 PIECE_LENGTH = 255
 KEY_LIST = ["color", "geom", "colgeom"]
-FILE_NAME_MAP = {"color": COLOR_FILE, "geom": GEOM_FILE, "colgeom": COLGEOM_FILE}
+# KEY_LIST = ["less"]
+FILE_NAME_MAP = {"less": CONTACT_FILE, "color": COLOR_FILE, "geom": GEOM_FILE, "colgeom": COLGEOM_FILE}
 
 
 def prepare_dir_list(logname):
@@ -28,16 +30,14 @@ def prepare_dir_list(logname):
 
 def prepare_no_log_dir_list():
     dir_list = []
-    for filder in os.listdir("./Metrological/Intensity/"):
-        n = "./Metrological/Intensity/" + filder + '/'
+    for filder in os.listdir("./Metrological/Distances/"):
+        n = "./Metrological/Distances/" + filder + '/'
         print(n)
         dir_list.append(n)
     return dir_list
 
 def all_1d_signals_processor(use_model=False):
-    # dir_list = prepare_dir_list(LOG_PATH)
     dir_list = prepare_no_log_dir_list()
-    # input(dir_list)
     print("Directory listing done")
     file_map = {}
     result_signal_map = {}
@@ -45,20 +45,27 @@ def all_1d_signals_processor(use_model=False):
     for dir in dir_list:
         signal_map = {}
         result_map = {}
-
         try:
             contact_name = dir + CONTACT_SIGNAL_FILE
             con_sig = read_contact_file(contact_name)
-            for key in KEY_LIST:
-                file_map[key] = dir + FILE_NAME_MAP[key]
-                print(file_map[key])
-                signal_map[key] = read_contactless_file(file_map[key])
-                result_map[key] = one_1d_vpg_processor(signal_map[key], con_sig)
-            print(result_map)
-            result_signal_map[dir] = result_map
         except:
-            print("blea")
             continue
+        for key in KEY_LIST:
+            file_map[key] = dir + FILE_NAME_MAP[key]
+            print(file_map[key])
+            try:
+                signal_map[key] = read_contactless_file(file_map[key])
+            except:
+                continue
+            result_map[key] = one_1d_vpg_processor(signal_map[key], con_sig)
+            print(result_map)
+            if not dir in result_signal_map:
+                result_signal_map[dir] = {}
+            result_signal_map[dir][key] = result_map[key]
+        # except:
+        #     print("blea")
+        #     continue
+
     measurement_statistics(result_signal_map)
     return
 
@@ -74,9 +81,10 @@ def one_1d_vpg_processor(vpg, contact_signal):
         print(i, " from ", length)
         vpg_piece = vpg[i:i+PIECE_LENGTH]
         contact_piece = contact_signal[i:i+PIECE_LENGTH]
-        hr, snr, flag = one_segment_procedure(vpg_piece, contact_piece)
+        hr, snr, flag, a1, a2 = one_segment_procedure(vpg_piece, contact_piece)
         print(flag)
         full_flag.append(flag)
+    # input(full_flag)
     return full_flag
 
 
@@ -93,10 +101,9 @@ def measurement_statistics(result_map):
             dir_map[key] = np.count_nonzero(a)/ len(a)
             algo_metric[key].append(np.count_nonzero(a)/ len(a))
         res_dir_map.append({dir: dir_map})
-    # input(algo_metric)
     input(res_dir_map)
     write_1d_metric(algo_metric)
-    write_json("intensity.json", res_dir_map)
+    write_json("distances_1_all_algo.json", res_dir_map)
     return
 
 def stat_sign(algo_metric):
@@ -135,6 +142,7 @@ def read_metrics():
     return data
 
 def read_contactless_file(fileName):
+    # if os.path.isfile(fileName):
     data = [[], []]
     with open(fileName, 'r') as f:
         for row in f:
@@ -148,6 +156,7 @@ def read_contactless_file(fileName):
                 else:
                     data[1].append(float(rowList[1]))
     return get_y_reverse_signal(np.asarray(data[1]))
+
 
 
 all_1d_signals_processor()

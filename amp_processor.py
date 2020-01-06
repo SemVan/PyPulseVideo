@@ -2,6 +2,7 @@ from matplotlib import pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 import numpy as np
 from classification import *
+from peakdetect import peakdetect
 
 PERIOD = 1/100
 WINDOW_SIZE = 1000
@@ -14,9 +15,6 @@ def full_fragment_amp_procedure(vpg, con_sig):
     for i in range(vpg_shape[0]):
         for j in range (vpg_shape[1]): #changed shape element number
             hr, snr, flag = one_segment_procedure(vpg[i][j], con_sig)
-            if flag:
-                plt.plot(range(len(vpg[i][j])), vpg[i][j])
-                plt.show()
             vpg_hr[i][j] = hr
             vpg_snr[i][j] = snr
             vpg_flag[i][j] = flag
@@ -28,8 +26,13 @@ def one_segment_procedure(segment_signal, contact_signal):
     fc, fc_amp = getSpectrumCentralFrequencyAndAmp(px, py)
     SNR = get_SNR(spectrum, fc_amp)
 
-    signal_flag = onePairProcedure(contact_signal, segment_signal)
-    return fc, SNR, signal_flag
+    # signal_flag = onePairProcedure(contact_signal, segment_signal)
+    freq1 = hard_peaks(contact_signal)
+    freq2 = hard_peaks(segment_signal)
+    signal_flag = -1
+    if abs(freq1*60-freq2*60) <=1:
+        signal_flag = 1
+    return fc, SNR, signal_flag#, freq1, freq2
 
 def get_fourier_result (signal, period):
     complex_four = np.fft.fft(signal)
@@ -73,3 +76,43 @@ def simple_peaks(signal, xAx, dotSize):
             x.append(xAx[i])
             y.append(signal[i])
     return x,y
+
+def get_median(data):
+    dsort = sorted(data)
+    return dsort[int(len(data)/2)]
+
+def hard_peaks(signal):
+    signal = np.asarray(signal) / np.max(signal)
+    peaks2 = peakdetect(signal,lookahead=8)
+    peaks_max = []
+    for i in peaks2[0]:
+        peaks_max.append(i[1])
+
+    peaks_max_ind = []
+    for j in peaks2[0]:
+        peaks_max_ind.append(j[0])
+
+
+    peaks_min = []
+    for i in peaks2[1]:
+        peaks_min.append(i[1])
+
+    peaks_min_ind = []
+    for j in peaks2[1]:
+        peaks_min_ind.append(j[0])
+
+    peaks_diff = []
+    for i in range(len(peaks_min_ind)-1):
+        peaks_diff.append(peaks_min_ind[i+1]-peaks_min_ind[i])
+    freq = -100
+    if len(peaks_diff) > 0:
+        freq = 1/(np.mean(peaks_diff)*0.04)
+
+    # x1 = np.arange(0, len(signal))
+    # y1 = np.array(signal)
+    # plt.plot(x1, y1)
+    # # plt.plot(peaks_max_ind, peaks_max, 'x')
+    # plt.plot(peaks_min_ind, peaks_min, 'x')
+    # plt.show()
+    # input()
+    return freq

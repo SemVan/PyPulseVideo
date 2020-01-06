@@ -38,7 +38,7 @@ def parce_one_type(d):
             param = parse_name(dude)
             if not param in result_map:
                 result_map[param] = []
-            result_map[param].append(100 * elem[list(elem.keys())[0]]['colgeom'])
+            result_map[param].append(100 * elem[list(elem.keys())[0]]['less'])
     return result_map
 
 
@@ -80,7 +80,7 @@ def prepare(data, label):
         # print(param)
         # input(data[str(param)])
         m, ml, mh = mean_confidence_interval(data[str(param)])
-        x.append(float(param) )
+        x.append(float(param)/ 100)
         y.append(np.mean(data[str(param)]))
         # y.append(get_median(data[str(param)]))
         y_low.append(ml)
@@ -91,19 +91,21 @@ def prepare(data, label):
     # plt.scatter(x, y)
 
 # intense = read_metrics("intensity.json")
-dist = read_metrics("distance.json")
-dist_net = read_metrics("intensity_net.json")
+dist = read_metrics("intensity_1_less.json")
+input(dist)
+# dist_net = read_metrics("intensity_net_1.json")
 
 # input(intense)
 # intense = parce_one_type(intense)
 dist = parce_one_type(dist)
-dist_net = parce_net_name(dist_net)
+# dist_net = parce_net_name(dist_net)
 # get_full_t_test(dist_net, dist)
 
 # prepare(dist, "Old algorithm")
-prepare(dist_net, "New algorithm")
-plt.xlabel("Освещенность БО, лк")
+prepare(dist, "New algorithm")
+plt.xlabel("Освещенность БО, м")
 plt.ylabel("Q-метрика, %")
+plt.ylim([0, 7])
 # plt.legend(loc='upper left')
 plt.grid(True)
 plt.show()
