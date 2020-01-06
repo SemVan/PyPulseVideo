@@ -7,9 +7,9 @@ from segmentor import *
 
 
 
-VIDEO_PATH = "./Measurements/"
-FILES_PATH = "./Segmented/Signals/"
-FILE_NAME = "signal.csv"
+VIDEO_PATH = "./Metrological/Int_videos/"
+FILES_PATH = "./Metrological/Intensity/"
+FILE_NAME = "signal_int.csv"
 
 loglist = ["ab", "cd"]
 for filename in os.listdir(VIDEO_PATH):
@@ -33,6 +33,6 @@ for filename in os.listdir(VIDEO_PATH):
             print("blya epta")
             continue
 
-with open("seglogger.txt", 'w') as f:
+with open("seglogger_intensity.txt", 'w') as f:
     for fil in loglist:
         f.write(fil+"\n")

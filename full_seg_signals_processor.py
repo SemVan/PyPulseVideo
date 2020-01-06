@@ -5,11 +5,11 @@ from general_math import *
 from metrics_io import *
 import os
 
-FILES_PATH = "./Segmented/Signals/"
-CONTACT_FILES_PATH = "./Signals/"
-SIGNAL_FILE = "signal.csv"
-CONTACT_SIGNAL_FILE = "Contact.txt"
-PIECE_LENGTH = 255
+FILES_PATH = "./Metrological/Intensity/"
+CONTACT_FILES_PATH = "./Metrological/Intensity/"
+SIGNAL_FILE = "signal_int.csv"
+CONTACT_SIGNAL_FILE = "Contactless.txt"
+PIECE_LENGTH = 64
 
 
 def prepare_dir_list(root_dir, force = False):
@@ -36,8 +36,8 @@ def prepare_dir_list_from_logger(logname):
 
 def all_signals_processor():
     dir_list = []
-    # dir_list = prepare_dir_list_from_logger(FILES_PATH, force = True)
-    dir_list = prepare_dir_list_from_logger("seglogger.txt")
+    dir_list = prepare_dir_list(FILES_PATH, force = True)
+    # dir_list = prepare_dir_list_from_logger("seglogger_intensity.txt")
     for dir in dir_list:
         print(dir)
     print()
@@ -45,12 +45,15 @@ def all_signals_processor():
     #     dir_list.append(i)
 
     print("Directory listing done")
-    for dir in dir_list[1:]:
+    for dir in dir_list:
         print(dir)
         last_name = dir.split('/')
-        contact_dir = CONTACT_FILES_PATH + last_name[-1][:-4] + "/" + CONTACT_SIGNAL_FILE
-        final_dir = FILES_PATH + last_name[-1][:-4]
-        file_name = final_dir + "/" + "signal.csv"
+        # contact_dir = CONTACT_FILES_PATH + last_name[-1][:-4] + "/" + CONTACT_SIGNAL_FILE
+        contact_dir = CONTACT_FILES_PATH + last_name[-1] + "/" + CONTACT_SIGNAL_FILE
+        # final_dir = FILES_PATH + last_name[-1][:-4]
+        final_dir = FILES_PATH + last_name[-1]
+        file_name = final_dir + '/' + SIGNAL_FILE
+        # input(file_name)
 
 
         if not os.path.isfile(contact_dir):
@@ -97,7 +100,7 @@ def one_vpg_processor(vpg, contact_signal):
     return [np.asarray(full_phase), np.asarray(full_hr), np.asarray(full_snr), np.asarray(full_flag)]
 
 def write_log(message):
-    with open ("log.txt", "a+") as file:
+    with open ("log_int_1.txt", "a+") as file:
         file.write(message)
     return
 

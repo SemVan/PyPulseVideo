@@ -3,9 +3,45 @@ from video_processor import *
 import time
 from file_writer import *
 
-VIDEO_PATH = "./Videos/Measurements/"
-FILES_PATH = "./Videos/CGCG13_10_19/"
+VIDEO_PATH = "./Metrological/Dist_videos/"
+FILES_PATH = "./Metrological/Distances/"
+ALL_FILES = set(["colgeom.txt", 'geom.txt', 'color.txt'])
 
+def get_default_list(direct):
+    dirlst = []
+    namelist = []
+    for filename in os.listdir(direct):
+        full_path = VIDEO_PATH + filename
+        dirlst.append(full_path)
+        namelist.append(filename.split('.')[0])
+    return dirlst, namelist
+
+
+def get_what_to_redo(direct, lst, dirlst):
+    redo_list = []
+    for subdir in os.listdir(direct):
+        if subdir in lst:
+            fuldir = direct + '/' + subdir
+            print(fuldir)
+            files_in_dir = []
+            for filename in os.listdir(fuldir):
+                files_in_dir.append(filename)
+            if not(ALL_FILES <= set(files_in_dir)):
+                redo_list.append(subdir)
+        else:
+            redo_list.append(subdir)
+    redo_dirlist = []
+    for filename in redo_list:
+        for dirname in dirlst:
+            if filename in dirname:
+                redo_dirlist.append(dirname)
+    input(redo_dirlist)
+    return
+
+
+dr, fl = get_default_list(VIDEO_PATH)
+get_what_to_redo(FILES_PATH, fl, dr)
+input()
 what_to_read = []
 for filename in os.listdir(VIDEO_PATH):
     print(filename)
