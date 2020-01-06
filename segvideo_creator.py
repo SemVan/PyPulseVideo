@@ -68,20 +68,20 @@ def make_edited_video(video_name, video_edited_name, metric_path):
         
         # draw segmentation grid
         if len(x[0])>0:
-            for i in range(X-1):
-                for j in range(Y-1):
+            for i in range(X):
+                for j in range(Y):
                     cv2.rectangle(img,(x[i][0,0],y[j][0,0]),(x[i+1][0,0],y[j+1][0,0]),(0,0,0))
                     
         # highlight good areas
         if len(x[0])>0:
-            for i in range(X-1):
-                for j in range(Y-1):
-                    fl = (flag[frame_number-1, Y-j-1, i]+1)/2
-                    rect = np.array([[x[i][0,0],y[j][0,0]],[x[i][0,0],y[j+1][0,0]],[x[i+1][0,0],y[j+1][0,0]],[x[i+1][0,0],y[j][0,0]]])
+            for i in range(X):
+                for j in range(Y):
+                    fl = (flag[frame_number-1, Y-1-j, i]+1)/2
+                    # rect = np.array([[x[i][0,0],y[j][0,0]],[x[i][0,0],y[j+1][0,0]],[x[i+1][0,0],y[j+1][0,0]],[x[i+1][0,0],y[j][0,0]]])
                     # print(rect)
                     if fl>0:
                         cv2.rectangle(img,(x[i][0,0],y[j][0,0]),(x[i+1][0,0],y[j+1][0,0]),(0,255*fl,0))
-                    cv2.fillPoly(mask, np.int32([rect]), (fl,fl,fl))
+                    # cv2.fillPoly(mask, np.int32([rect]), (fl,fl,fl))
         # img = img*np.uint8(mask)
         # opacity = 0.5
         # cv2.addWeighted(np.uint8(mask), opacity, img, 1 - opacity, 0, img)
@@ -122,15 +122,15 @@ def highlight_face(img, face):
 
 def filter_flag(flag):
     frames, Y, X = flag.shape
-    prev = -1
     counter = np.uint8(0)
-    for x in range(X-1):
-        for y in range (Y-1):
+    for x in range(X):
+        for y in range(Y):
+            prev = -1
             for i in range(frames-1):
                 fl = flag[i,y,x]
                 if (fl-prev)>0 or counter>0:
                     counter += np.uint8(1)
                     flag[i,y,x] = 1
-                prev = fl
+                prev = flag[i,y,x]
     return flag
                 
