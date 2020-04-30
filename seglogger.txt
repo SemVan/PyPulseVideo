@@ -1,5 +1,0 @@
-ab
-cd
-./Measurements/Andreeva_1_27.04.19.avi
-./Measurements/Chepik_1_27.04.10.avi
-./Measurements/Fomenko_1_27.04.19.avi
