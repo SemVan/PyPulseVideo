@@ -84,7 +84,7 @@ def make_edited_video(video_name, video_edited_name, metric_path):
         if len(x[0])>0:
             for i in range(X):
                 for j in range(Y):
-                    cv2.rectangle(img,(x[i][0,0],y[j][0,0]),(x[i+1][0,0],y[j+1][0,0]),(0,0,0))
+                    cv2.rectangle(img,(x[i][0,0],y[j][0,0]),(x[i+1][0,0]-1,y[j+1][0,0]-1),(0,0,0))
                     
         # highlight good areas
         if len(x[0])>0:
@@ -102,8 +102,8 @@ def make_edited_video(video_name, video_edited_name, metric_path):
                         x1 = int(x[i][0,0])
                         y1 = int(y[j][0,0])
                         start = (x1,y1)
-                        x2 = int(x[i+1][0,0])
-                        y2 = int(y[j+1][0,0])
+                        x2 = int(x[i+1][0,0]-1)
+                        y2 = int(y[j+1][0,0]-1)
                         final = (x2,y2)
                         color = (b,g,r)
                         cv2.rectangle(img,start,final,color)

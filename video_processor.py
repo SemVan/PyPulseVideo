@@ -12,6 +12,7 @@ def full_video_file_procedure(file_name):
         print("fuck opened")
         return 0, 0
 
+    start = dt.datetime.now()
     geometrical = []
     colorful = []
     colgeom = []
@@ -25,4 +26,7 @@ def full_video_file_procedure(file_name):
         geometrical.append(g)
         colorful.append(c)
         colgeom.append(cg)
+    
+    print('processing time')
+    print(dt.datetime.now()-start)
     return geometrical, colorful, colgeom

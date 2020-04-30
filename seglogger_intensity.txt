@@ -1,0 +1,3 @@
+ab
+cd
+./Metrological/Int_videos/semchuk_high_illumination_close.avi

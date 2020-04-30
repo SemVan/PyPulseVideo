@@ -7,9 +7,9 @@ from segvideo_creator import *
 
 
 
-VIDEO_PATH = "./Measurements/"
+VIDEO_PATH = "./Metrological/Dist_videos/"
 EDITED_PATH = "./Edited/"
-FILES_PATH = "./Segmented/Signals/"
+FILES_PATH = "./Metrological/Intensity/"
 FILE_NAME = "flag.csv"
 
 
