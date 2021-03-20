@@ -1,4 +1,4 @@
-import csv
+    import csv
 import os
 import numpy as np
 
@@ -6,7 +6,7 @@ import numpy as np
 
 CONTACTLESS_NAME = "color.txt"
 CONTACT_NAME = "Contact.txt"
-NORMAL_LENGTH = 500
+NORMAL_LENGTH = 5   00
 
 def read_contact_file(fileName):
     data = []

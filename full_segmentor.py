@@ -22,5 +22,5 @@ for filename in os.listdir(VIDEO_PATH):
         start = time.time()
         seg_sig = get_segmented_video(full_path)
         print(time.time() - start)
-        if seg_sig is not None and len(seg_sig) != 0:
+        if seg_sig is not None and len(seg_sig) != 0    :
             write_segmented_file(file_name, seg_sig)
