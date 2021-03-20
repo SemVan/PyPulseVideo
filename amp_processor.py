@@ -3,6 +3,7 @@ from mpl_toolkits.mplot3d import Axes3D
 import numpy as np
 from classification import *
 from peakdetect import peakdetect
+from pan_tompkins import *
 
 PERIOD = 1/100
 WINDOW_SIZE = 1000
@@ -25,14 +26,28 @@ def one_segment_procedure(segment_signal, contact_signal):
     px, py = simple_peaks(spectrum, freqs, np.arange(1,2))
     fc, fc_amp = getSpectrumCentralFrequencyAndAmp(px, py)
     SNR = get_SNR(spectrum, fc_amp)
+    print(np.asarray(contact_signal).shape)
+    signal_flag = onePairProcedure(contact_signal, segment_signal)
+    cont_pan_tom, fuck1 = pan_tompkins_algo(contact_signal)
+    # plt.plot(range(len(cont_pan_tom)), cont_pan_tom)
+    # plt.plot(range(len(fuck)), fuck)
+    # plt.show()
+    less_pan_tom, fuck =  pan_tompkins_algo(segment_signal)
 
-    # signal_flag = onePairProcedure(contact_signal, segment_signal)
-    freq1 = hard_peaks(contact_signal)
-    freq2 = hard_peaks(segment_signal)
+    freq1 = hard_peaks(cont_pan_tom)
+    freq2 = hard_peaks(less_pan_tom)
     signal_flag = -1
-    if abs(freq1*60-freq2*60) <=1:
+    print("CONTACT ", freq1)
+    if freq1 == -100:
+        freq1 = -10000
+    print("LESS ", freq2)
+    # input()
+    if abs(freq1*60-freq2*60) <=3:
+        # plt.plot(range(len(cont_pan_tom)), cont_pan_tom)
+        # plt.plot(range(len(less_pan_tom)), less_pan_tom)
+        # plt.show()
         signal_flag = 1
-    return fc, SNR, signal_flag#, freq1, freq2
+    return freq1*60, SNR, signal_flag#, freq1, freq2
 
 def get_fourier_result (signal, period):
     complex_four = np.fft.fft(signal)
@@ -104,10 +119,12 @@ def hard_peaks(signal):
     peaks_diff = []
     for i in range(len(peaks_min_ind)-1):
         peaks_diff.append(peaks_min_ind[i+1]-peaks_min_ind[i])
+    print(peaks_diff)
+    print(np.mean(peaks_diff))
     freq = -100
     if len(peaks_diff) > 0:
         freq = 1/(np.mean(peaks_diff)*0.04)
-
+    #
     # x1 = np.arange(0, len(signal))
     # y1 = np.array(signal)
     # plt.plot(x1, y1)

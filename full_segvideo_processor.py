@@ -33,6 +33,6 @@ for filename in os.listdir(VIDEO_PATH):
             print("blya epta")
             continue
 
-with open("seglogger_intensity.txt", 'w') as f:
+with open("seglogger_intensity_new.txt", 'w') as f:
     for fil in loglist:
         f.write(fil+"\n")

@@ -4,8 +4,9 @@ import numpy as np
 
 FILES_TO_READ = ["instensity_net_1.json", "distance_net_1.json", "distances_1_all_algo.json", "intensity_1_all_algo.json"]
 ALGO_NAMES = {'geom': "Landmarks based", 'color': "RGB based", 'colgeom': "Combined", 'net': "Landmarks net based"}
-INT_LABELS = ["Bioobject illuminance, lx", "Q-metric, %"]
-DIST_LABELS = ["Distance to bioobjet, cm", "Q-metric, %"]
+INT_LABELS = ["Bioobject illuminance, lx", "Q-metric"]
+DIST_LABELS = ["Distance to bioobjet, cm", "Q-metric"]
+MARKERS = ["o", "v", "s", "P"]
 
 def read_json(filename):
     with open (filename) as f:
@@ -47,13 +48,15 @@ def build(full_data):
 
 def plot_data(data, xlabel, ylabel):
     plt.figure()
+    i = 0
     for algo in plots_int:
-        plt.plot(data[algo][0], data[algo][1], label=ALGO_NAMES[algo])
+        plt.plot(data[algo][0], data[algo][1], marker=MARKERS[i], label=ALGO_NAMES[algo])
         plt.grid(True)
         plt.legend(loc='upper center', bbox_to_anchor=(0.5, -0.08),
           fancybox=True, shadow=False, ncol=4)
         plt.xlabel(xlabel)
         plt.ylabel(ylabel)
+        i += 1
     plt.show()
 
 

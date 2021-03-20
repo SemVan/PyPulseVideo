@@ -4,8 +4,10 @@ import time
 from file_writer import *
 from segmentor import *
 
-VIDEO_PATH = "./Videos/Measurements/"
-FILES_PATH = "./Videos/Segmented/"
+# VIDEO_PATH = "./Videos/Measurements/"
+# FILES_PATH = "./Videos/Segmented/"
+VIDEO_PATH = "./mahnob/MAHNOB_VIDEOS/"
+FILES_PATH = "./mahnob/MAHNOB_ECG/"
 
 for filename in os.listdir(VIDEO_PATH):
     if filename.endswith(".avi"):
@@ -20,5 +22,5 @@ for filename in os.listdir(VIDEO_PATH):
         start = time.time()
         seg_sig = get_segmented_video(full_path)
         print(time.time() - start)
-        if not seg_sig == None:
+        if seg_sig is not None and len(seg_sig) != 0:
             write_segmented_file(file_name, seg_sig)

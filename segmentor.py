@@ -11,7 +11,7 @@ import time
 float_formatter = lambda x: "%.3f" % x
 np.set_printoptions(formatter={'float_kind':float_formatter})
 
-ver =  [6, 5, 57, 50, 33, 30, 29, 28]
+ver =  [6, 5, 57, 50, 33, 30, 29, 28, 24]
 hor = [3, 4, 5, 6, 7, 8, 9, 10 ,11, 12, 13]
 
 
@@ -30,7 +30,7 @@ def get_segmented_video(file_name):
             break
         one_vpg = get_segmented_frame(img)
         if one_vpg == []:
-            return []
+            return np.asarray([])
         full_video_signals.append(one_vpg)
         frametime = dt.datetime.now() - st
         print(frametime.microseconds/1000)
@@ -60,6 +60,10 @@ def get_segmented_frame(img):
         for j in range(len(ver)-1):
             hl_y = points[ver[j+1]][0,1]
             lr_y = points[ver[j]][0,1]
+            print(ver[j])
+            if ver[j+1] == 24:
+                lr_y = points[ver[j+1]][0,1] + (points[ver[j+1]][0,1] - points[36][0,1])
+                hl_y = points[ver[j+1]][0,1]
             # if hl_y>lr_y:
             #     lr_y, hl_y = hl_y, lr_y
             # if (hl_y == lr_y):

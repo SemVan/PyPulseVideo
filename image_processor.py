@@ -4,6 +4,7 @@ import cv2
 import dlib
 import numpy as np
 import datetime as dt
+from sklearn.linear_model import LinearRegression
 
 PREDICTOR_PATH = "shape_predictor_68_face_landmarks.dat"
 predictor = dlib.shape_predictor(PREDICTOR_PATH)
@@ -15,26 +16,29 @@ def full_frame_procedure(frame):
     start = dt.datetime.now()
     face_frame, rectangle = detect_face(frame)
 
-    if rectangle is None:
+    if rectangle is None or len(rectangle) < 4:
         print("returning None")
         return None, None, None
     face_stop = dt.datetime.now()
-    face_el = face_stop-start
+    # face_el = face_stop-start
+
+    # colgeom = geometrical_and_color(frame, rectangle)
+    # return 0, 0, colgeom
     # print("face detection " + str(face_el.microseconds/1000))
-    geom = geometrical_frame_procedure(frame, rectangle)
-    geom_stop = dt.datetime.now()
-    geom_el = geom_stop-face_stop
+    geom = geometrical_frame_procedure(face_frame, rectangle)
+    # geom_stop = dt.datetime.now()
+    # geom_el = geom_stop-face_stop
     # print("geometrical processing " + str(geom_el.microseconds/1000))
 
-    color=[]
+    # color=[]
     color = colorful_frame_procedure(face_frame, frame)
-    color_stop = dt.datetime.now()
-    color_el = color_stop-geom_stop
+    # color_stop = dt.datetime.now()
+    # color_el = color_stop-geom_stop
     # print("color processing " + str(color_el.microseconds/1000))
 
-    colgeom = geometrical_and_color(frame,rectangle)
+    colgeom = geometrical_and_color(face_frame, rectangle)
     geom_color_stop = dt.datetime.now()
-    geom_color_el = geom_color_stop-color_stop
+    # geom_color_el = geom_color_stop-color_stop
     # print("geometrical & color processing " + str(geom_color_el.microseconds/1000))
     full_el = geom_color_stop-start
     # print("full processing " + str(full_el.microseconds/1000))
@@ -75,8 +79,8 @@ def geometrical_and_color(frame, rectangle):
     vec,point = get_baseline(BGR)
 
     # get mean squared distance to the axis
-    mean = get_meanDistances2(vec,point,BGR)
-    mean = mean ** 0.5
+    # mean = get_meanDistances2(vec,point,BGR)
+    # mean = mean ** 0.5
     mean = 10
 
     # calculate distances to the axis
@@ -152,9 +156,9 @@ def find_skin_regions(img, face, rd, gr, bl):
     return final
 
 def colorful_frame_procedure(face, frame):
-    img = frame.copy()
-    fc = face.copy()
-    skin = detect_skin(fc, img)
+    # img = frame.copy()
+    # fc = face.copy()
+    skin = detect_skin(face, frame)
     # cv2.imshow("color", skin)
     # cv2.waitKey(10)
     return get_sum_channels(skin)
@@ -238,7 +242,7 @@ def detect_skin(face, background):
     imageYCrCb = cv2.cvtColor(face,cv2.COLOR_BGR2YCR_CB)
     skinRegion = cv2.inRange(imageYCrCb,min_YCrCb,max_YCrCb)
     skin = cv2.bitwise_and(face, face, mask=skinRegion)
-    image, contours, hierarchy = cv2.findContours(skinRegion, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    contours, hierarchy = cv2.findContours(skinRegion, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     # image, contours = cv2.findContours(skinRegion, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     for i, c in enumerate(contours):
         area = cv2.contourArea(c)
@@ -250,7 +254,7 @@ def detect_skin(face, background):
 
 
 def detect_face(image):
-    faces = cascade.detectMultiScale(image, scaleFactor=1.1, minNeighbors=5, minSize=(100, 100), maxSize=(550, 550))
+    faces = cascade.detectMultiScale(image, scaleFactor=1.1, minNeighbors=5, minSize=(200, 200), maxSize=(550, 550))
     if len(faces) > 0:
         strt_x = faces[0][0]
         strt_y = faces[0][1]
@@ -312,3 +316,16 @@ def get_baseline(BGR):
     vec=vec/normale
     point=[x0,y0,z0]
     return vec,point
+
+def get_baseline_2(BGR):
+    B=BGR[::3]
+    G=BGR[1::3]
+    R=BGR[2::3]
+    xs = []
+    for i in range(len(B)):
+        xs.append([B[i], R[i]])
+    ys = G
+
+    clf = LinearRegression()
+    clf.fit(xs, ys)
+    return clf.score(xs, ys)

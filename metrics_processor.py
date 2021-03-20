@@ -2,13 +2,13 @@ from metrics_io import *
 import os
 import numpy as np
 import json
-
+from matplotlib import pyplot as plt
 
 FILES_PATH = "./Metrological/Intensity/"
 CONTACT_FILES_PATH = "./Metrological/Intensity/"
 SIGNAL_FILE = "signal_int.csv"
 CONTACT_SIGNAL_FILE = "Contactless.txt"
-PIECE_LENGTH = 255
+PIECE_LENGTH = 64
 ALGO_NAME = "net"
 
 def prepare_dir_list(root_dir):
@@ -31,9 +31,21 @@ def full_metrics_processor():
     true_sum_flag = 0
     good_signal_counter = 0
     dir_map = []
+    full_hr = []
     for dir in dir_list:
-        metrics = read_metrics(dir)
+        try:
+            metrics = read_metrics(dir)
+        except:
+            continue
         flag = metrics[-1]
+        hr = metrics[1]
+        for i in range(flag.shape[0]):
+            for j in range(flag.shape[1]):
+                for k in range(flag.shape[2]):
+                    if flag[i][j][k] == 1:
+                        if   [k] >0 and hr[i][j][k] < 200:
+
+                            full_hr.append(hr[i][j][k])
         flag = flag.astype(int)
         print(dir)
         tp = np.sum(flag == 1)/ np.sum(flag != 0)
@@ -52,6 +64,9 @@ def full_metrics_processor():
         print()
         tp = cnt / flag.shape[0]
         dir_map.append({dir: {"net": tp}})
+
+    plt.hist(full_hr, bins = 50)
+    plt.show()
     write_json('distances_1d_net.json', dir_map)
     print("TOTAL TRUE ", true_sum_flag)
     print("TOTAL FRAGMENTS ", full_summ_frag)

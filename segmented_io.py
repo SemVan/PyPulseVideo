@@ -2,7 +2,7 @@ import numpy as np
 import csv
 
 
-def write_segmented_file(file_path,video_signal):
+def write_segmented_file(file_path, video_signal):
     dims = video_signal.shape
     packed_sig = pack_signal(video_signal)
     with open(file_path, 'w', newline='') as csvfile:
@@ -40,9 +40,12 @@ def unpack_signal(packed, dim):
 def read_contact_file(fileName):
     data = []
     with open(fileName, 'r') as f:
-        for row in f:
-            rowList = row.split(",")
-            if len(rowList)==2:
-                data.append(float(rowList[1]))
+        for row in f.read().splitlines():
+            rowList = row.split("/n")
+            for elem in rowList:
+                try:
+                    data.append(float(elem))
+                except:
+                    continue
 
     return np.asarray(data)
