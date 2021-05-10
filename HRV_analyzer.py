@@ -58,7 +58,7 @@ def params_processor():
                 # histogram method
                 
                 hist = np.histogram(RRs, bins = HISTOGRAM_BINS)
-                h = hist[0][hist[0] > 0]
+                h = hist[0][np.where(hist[0] > 0)]
                 metrics["MxDMn"] = np.max(RRs) - np.min(RRs)
                 metrics["AMo"] = np.max(h)
                 metrics["Mo"] = hist[1][np.argmax(hist[0])]
